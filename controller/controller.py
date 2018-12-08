@@ -113,6 +113,8 @@ class Controller:
                             self.audio.sound_toggle()
                         elif event.key == Controller.KEY_MUSIC_TOGGLE:
                             self.audio.music_toggle()
+                        elif event.key == Controller.KEY_QUIT:
+                            loop = False
 
                     elif self.game.state == model.Game.READY:
                         if event.key == Controller.KEY_START:

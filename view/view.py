@@ -1,8 +1,10 @@
 import logging
-from .graphics import *
 import os
+
 import pygame
+
 import model
+from .graphics import *
 
 
 class ImageManager:
@@ -58,11 +60,9 @@ class ImageManager:
         new_skin_name = ImageManager.DEFAULT_SKIN
         new_skin = (new_skin_name, {
 
-
         })
 
         ImageManager.skins[new_skin_name] = new_skin
-
 
     def get_skin_image(self, tile_name: str, skin_name: str = DEFAULT_SKIN, tick=0, width: int = 32, height: int = 32):
 
@@ -102,7 +102,6 @@ class ImageManager:
         sheet_file_name = "fire.png"
         for i in range(0, 3):
             self.sprite_sheets["fire{0}.png".format(i)] = (sheet_file_name, (i * 32, 0, 32, 32))
-
 
 
 class View():
@@ -181,15 +180,15 @@ class MainFrame(View):
 
         pane_rect = self.surface.get_rect()
 
-        # self.title_bar.draw()
+        self.title_bar.draw()
         self.status_bar.draw()
 
         x = 0
         y = 0
 
-        # self.surface.blit(self.title_bar.surface, (x, y))
-        #
-        # y += MainFrame.TITLE_HEIGHT
+        self.surface.blit(self.title_bar.surface, (x, y))
+
+        y += MainFrame.TITLE_HEIGHT
 
         if self.game.state == model.Game.READY:
             self.game_ready.draw()
@@ -303,6 +302,7 @@ class TitleBar(View):
 
 
 class StatusBar(View):
+
     FG_COLOUR = Colours.WHITE
     BG_COLOUR = Colours.BLACK
     ICON_WIDTH = 40
@@ -329,8 +329,8 @@ class StatusBar(View):
         self.current_message_number = 0
 
     def process_event(self, new_event: model.Event):
-        if new_event.type == model.Event.BATTLE:
-            self.status_messages.append((new_event.description, StatusBar.MESSAGE_TICK_LIFE))
+
+        self.status_messages.append((new_event.description, StatusBar.MESSAGE_TICK_LIFE))
 
     def tick(self):
 
@@ -378,9 +378,8 @@ class StatusBar(View):
             y = 8
             x = int(pane_rect.width * 3 / 4)
 
-
         elif self.game.state == model.Game.PAUSED:
-            msg = "Esc:Resume   F5:Toggle Sound   F5:Toggle Music "
+            msg = "Esc:Resume   F5:Toggle Sound   F5:Toggle Music   F4:Quit"
             draw_text(self.surface,
                       msg=msg,
                       x=10,
@@ -461,7 +460,6 @@ class GameView(View):
         self.game = game
 
     def draw(self):
-
         if self.game is None:
             raise ("No Game to view!")
 
@@ -489,18 +487,15 @@ class GameOverView(View):
     SCORE_TEXT_SIZE = 22
 
     def __init__(self, width: int, height: int = 500):
-
         super(GameOverView, self).__init__()
 
         self.game = None
         self.surface = pygame.Surface((width, height))
 
     def initialise(self, game: model.Game):
-
         self.game = game
 
     def draw(self):
-
         self.surface.fill(GameOverView.BG_COLOUR)
 
         if self.game is None:
@@ -521,7 +516,6 @@ class GameOverView(View):
                   size=30,
                   fg_colour=fg_colour,
                   bg_colour=GameOverView.BG_COLOUR)
-
 
 
 def draw_icon(surface, x, y, icon_name, count: int = None, tick: int = 0, width=32, height=32):

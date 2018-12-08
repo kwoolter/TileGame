@@ -4,7 +4,7 @@ import controller
 
 def main():
 
-    print("Hello World")
+    logging.basicConfig(level = logging.WARN)
 
     c = controller.Controller()
     c.run()
