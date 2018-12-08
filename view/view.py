@@ -154,7 +154,7 @@ class MainFrame(View):
         super(MainFrame, self).initialise()
 
         self.surface = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF | pygame.HWACCEL)
-        self.surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        #self.surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
 
         os.environ["SDL_VIDEO_CENTERED"] = "1"
         pygame.init()
@@ -379,7 +379,7 @@ class StatusBar(View):
             x = int(pane_rect.width * 3 / 4)
 
         elif self.game.state == model.Game.PAUSED:
-            msg = "Esc:Resume   F5:Toggle Sound   F5:Toggle Music   F4:Quit"
+            msg = "Esc:Resume   F5:Toggle Sound   F6:Toggle Music   F4:Quit"
             draw_text(self.surface,
                       msg=msg,
                       x=10,

@@ -1,5 +1,4 @@
 import os
-
 import pygame
 from pygame.locals import *
 
@@ -7,8 +6,8 @@ import audio
 import model
 import view
 
-
 class Controller:
+
     PLAYING = "Playing"
 
     KEY_PAUSE = K_ESCAPE
@@ -73,7 +72,7 @@ class Controller:
             # Loop to process pygame events
             for event in pygame.event.get():
 
-                # Timer events
+                # Process 1 second timer events
                 if event.type == USEREVENT + 1:
                     self.game.tick()
                     self.view.tick()
@@ -84,10 +83,7 @@ class Controller:
                     except Exception as err:
                         print(str(err))
 
-                elif event.type == QUIT:
-                    loop = False
-
-                # Timer for Computer AI moves
+                # Process 0.5 second timer events
                 elif event.type == USEREVENT + 2:
                     pass
 
@@ -128,6 +124,10 @@ class Controller:
                         elif event.key == Controller.KEY_QUIT:
                             loop = False
 
+                # QUIT event
+                elif event.type == QUIT:
+                    loop = False
+
             self.view.draw()
             self.view.update()
 
@@ -136,4 +136,3 @@ class Controller:
         self.view.end()
         self.audio.end()
         self.game.end()
-
