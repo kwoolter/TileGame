@@ -15,6 +15,8 @@ class Controller:
     KEY_START = K_SPACE
     KEY_GAME_OVER = K_BACKSPACE
     KEY_QUIT = K_F4
+    KEY_SOUND_TOGGLE = K_F5
+    KEY_MUSIC_TOGGLE = K_F6
 
     def __init__(self):
 
@@ -33,8 +35,8 @@ class Controller:
         pygame.mixer.pre_init(44100, -16, 2, 2048)
         pygame.mixer.init()
 
-        self.audio.music_on = True
-        self.audio.sound_on = True
+        self.audio.is_music_on = True
+        self.audio.is_sound_on = True
 
     def run(self):
 
@@ -107,6 +109,10 @@ class Controller:
                     elif self.game.state == model.Game.PAUSED:
                         if event.key == Controller.KEY_PAUSE:
                             self.game.pause(False)
+                        elif event.key == Controller.KEY_SOUND_TOGGLE:
+                            self.audio.sound_toggle()
+                        elif event.key == Controller.KEY_MUSIC_TOGGLE:
+                            self.audio.music_toggle()
 
                     elif self.game.state == model.Game.READY:
                         if event.key == Controller.KEY_START:

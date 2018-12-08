@@ -380,7 +380,7 @@ class StatusBar(View):
 
 
         elif self.game.state == model.Game.PAUSED:
-            msg = "Esc:Resume"
+            msg = "Esc:Resume   F5:Toggle Sound   F5:Toggle Music "
             draw_text(self.surface,
                       msg=msg,
                       x=10,
@@ -391,7 +391,7 @@ class StatusBar(View):
                       centre=False)
 
         elif self.game.state == model.Game.READY:
-            msg = "SPACE:Start"
+            msg = "SPACE:Start   F4:Quit"
             draw_text(self.surface,
                       msg=msg,
                       x=10,
@@ -401,7 +401,7 @@ class StatusBar(View):
                       size=StatusBar.STATUS_TEXT_FONT_SIZE,
                       centre=False)
         elif self.game.state == model.Game.GAME_OVER:
-            msg = "SPACE:Continue"
+            msg = "SPACE:Continue   F4:Quit"
             draw_text(self.surface,
                       msg=msg,
                       x=10,

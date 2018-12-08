@@ -25,8 +25,8 @@ class AudioManager:
         self.music_themes = None
         self.sounds_cache = None
         self.current_music = None
-        self.music_on = False
-        self.sound_on = False
+        self.is_music_on = False
+        self.is_sound_on = False
 
     def process_event(self, new_event: model.Event):
         print("AudioManager event process:{0}".format(new_event))
@@ -49,12 +49,23 @@ class AudioManager:
         pygame.mixer.pre_init(44100, -16, 2, 2048)
         pygame.mixer.init()
 
+    def music_toggle(self):
+        self.is_music_on = not self.is_music_on
+
+        if self.is_music_on is False:
+            self.stop_music()
+
+    def sound_toggle(self):
+        self.is_sound_on = not self.is_sound_on
+
+        if self.is_sound_on == False:
+            pass
 
     def get_theme_sound(self, sound_name: str, sound_theme: str = DEFAULT_THEME, play=True):
 
         sound = None
 
-        if self.sound_on is False:
+        if self.is_sound_on is False:
             return None
 
         if sound_theme not in self.sound_themes.keys():
@@ -117,7 +128,7 @@ class AudioManager:
 
         print("Play that funky music...{0} from {1} theme".format(music_name, music_theme))
 
-        if self.music_on is False:
+        if self.is_music_on is False:
             return
 
         if music_theme not in self.music_themes.keys():
