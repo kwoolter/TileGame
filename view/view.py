@@ -1,5 +1,6 @@
 import logging
 import os
+import math
 
 import pygame
 
@@ -59,6 +60,11 @@ class ImageManager:
 
         new_skin_name = ImageManager.DEFAULT_SKIN
         new_skin = (new_skin_name, {
+
+            model.Objects.TILE : "hexagon2.png",
+            model.Objects.TILE2: "hexagon3.png",
+            model.Objects.TILE_BASE: "hexagon_base.png",
+
 
         })
 
@@ -450,6 +456,12 @@ class GameView(View):
     FG_COLOUR = Colours.GOLD
     BG_COLOUR = Colours.DARK_GREY
 
+    Y_SQUASH = .5
+    TILE_ROTATE_ANGLE = 0
+    TILE_IMAGE_WIDTH = int(64)
+    #TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
+    TILE_IMAGE_HEIGHT = int(64)
+
     def __init__(self, width: int, height: int = 500):
         super(GameView, self).__init__()
 
@@ -458,6 +470,22 @@ class GameView(View):
 
     def initialise(self, game: model.Game):
         self.game = game
+
+        self.dx = GameView.TILE_IMAGE_WIDTH * 3/4
+        self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)
+
+    def model_to_view(self, x : int, y : int):
+
+        view_x = x * GameView.TILE_IMAGE_WIDTH - ((y % 2) * GameView.TILE_IMAGE_WIDTH / 2)
+        view_y = y * GameView.TILE_IMAGE_HEIGHT * 3 /4
+
+        view_x = int(x * self.dx - ((1-math.cos(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3/4))
+        view_y = int(y * self.dy + ((x % 2) * self.dy/2) - ((1-math.sin(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3/4))
+
+
+
+        return view_x, view_y
+
 
     def draw(self):
         if self.game is None:
@@ -479,6 +507,41 @@ class GameView(View):
                   size=40,
                   fg_colour=GameReadyView.FG_COLOUR,
                   bg_colour=GameReadyView.BG_COLOUR)
+
+
+        image = View.image_manager.get_skin_image(model.Objects.TILE2,
+                                                  width=GameView.TILE_IMAGE_WIDTH,
+                                                  height=GameView.TILE_IMAGE_HEIGHT,
+                                                  tick=self.tick_count)
+
+
+        image = pygame.transform.scale(image, (GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
+        #image = pygame.transform.rotate(image, GameView.TILE_ROTATE_ANGLE)
+
+        image_base = View.image_manager.get_skin_image(model.Objects.TILE_BASE,
+                                                  width=GameView.TILE_IMAGE_WIDTH,
+                                                  height=GameView.TILE_IMAGE_HEIGHT,
+                                                  tick=self.tick_count)
+
+        image_base = pygame.transform.scale(image_base, (GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
+
+        x = pane_rect.centerx - 32
+        y += 100
+
+        width = 20
+        height = 10
+
+        for tile_y in range (0, height - 1):
+            if tile_y >= height - 1:
+                image = image_base
+
+
+            for tile_x in range(0, width - 1):
+
+                view_x, view_y = self.model_to_view(tile_x, tile_y)
+                self.surface.blit(image, (view_x, view_y + y))
+
+
 
 
 class GameOverView(View):
