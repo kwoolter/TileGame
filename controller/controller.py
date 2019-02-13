@@ -64,7 +64,7 @@ class Controller:
                 except Exception as err:
                     print(str(err))
 
-                if event.type == model.Event.QUIT:
+                if event.type == model.Game.QUIT:
                     loop = False
 
                 event = self.game.get_next_event()
@@ -90,7 +90,7 @@ class Controller:
                 # Key pressed events
                 elif event.type == KEYUP:
 
-                    if self.game.state == model.Game.PLAYING:
+                    if self.game.state == model.Game.STATE_PLAYING:
 
                         try:
 
@@ -102,7 +102,7 @@ class Controller:
                         except Exception as err:
                             print(str(err))
 
-                    elif self.game.state == model.Game.PAUSED:
+                    elif self.game.state == model.Game.STATE_PAUSED:
                         if event.key == Controller.KEY_PAUSE:
                             self.game.pause(False)
                         elif event.key == Controller.KEY_SOUND_TOGGLE:
@@ -112,13 +112,13 @@ class Controller:
                         elif event.key == Controller.KEY_QUIT:
                             loop = False
 
-                    elif self.game.state == model.Game.READY:
+                    elif self.game.state == model.Game.STATE_READY:
                         if event.key == Controller.KEY_START:
                             self.game.start()
                         elif event.key == Controller.KEY_QUIT:
                             loop = False
 
-                    elif self.game.state == model.Game.GAME_OVER:
+                    elif self.game.state == model.Game.STATE_GAME_OVER:
                         if event.key == Controller.KEY_START:
                             self.game.initialise()
                         elif event.key == Controller.KEY_QUIT:

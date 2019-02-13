@@ -1,0 +1,17 @@
+Name,Description,Category,Graphic
+Wood,Some Wood,Material,|
+Grain,Some Grain,Food,`
+Rice,Some Rice,Food,%
+Nails,Some Nails,Material,""""
+Bricks,Some Bricks,Material,_
+Straw,Straw,Material,#
+Mud,Mud,Material,~
+XP,XP,Stat,
+Small Wooden House,Small Wooden House,Structure,w
+Medium Wooden House,Medium Wooden House,Structure,W
+Large Wooden House,Large Wooden House,Structure,M
+Small Brick House,Small Brick House,Structure,b
+Earth,Earth,Material,.
+Snow,Snow,Material,*
+Grass,Grass,Material,¦
+Sea,Sea,Material,~

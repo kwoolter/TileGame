@@ -1,7 +1,14 @@
 import collections
 import logging
 import os
-
+from .utils import Event
+from .utils import EventQueue
+from .building_blocks import Resource
+from .building_blocks import Inventory
+from .building_blocks import Creatable
+from .building_blocks import ResourceFactory
+from .building_blocks import CreatableFactoryXML
+from .building_blocks import WorldMap
 
 class Objects:
     EMPTY = "empty"
@@ -19,14 +26,17 @@ class Objects:
     DOWN = "down"
 
 
-class Game():
-    LOADED = "LOADED"
-    READY = "READY"
-    PLAYING = "PLAYING"
-    BATTLE = "BATTLE"
-    PAUSED = "PAUSED"
-    GAME_OVER = "GAME OVER"
+class Game:
+
+    STATE_LOADED = "LOADED"
+    STATE_READY = "READY"
+    STATE_PLAYING = "PLAYING"
+    STATE_BATTLE = "BATTLE"
+    STATE_PAUSED = "PAUSED"
+    STATE_GAME_OVER = "GAME OVER"
     END = "END"
+    TICK = "Tick"
+    QUIT = "Quit"
 
     SAVE_GAME_DIR = os.path.dirname(__file__) + "\\saves\\"
     GAME_DATA_DIR = os.path.dirname(__file__) + "\\data\\"
@@ -34,8 +44,15 @@ class Game():
     def __init__(self, name: str):
 
         self.name = name
-        self._state = Game.LOADED
+        self._state = Game.STATE_LOADED
         self.tick_count = 0
+
+        self.inventory = None
+        self.resources = None
+        self.creatables = None
+        self.creations = None
+        self.map = None
+
         self.events = EventQueue()
         self.events.add_event(Event("{0} model created!".format(self.name)))
 
@@ -54,18 +71,42 @@ class Game():
 
     def initialise(self):
 
-        self.state = Game.READY
+        self.state = Game.STATE_READY
 
+        self.inventory = Inventory()
+        self.resources = ResourceFactory(Game.GAME_DATA_DIR + "resources.csv")
+        self.resources.load()
+
+        self.creatables = CreatableFactoryXML(Game.GAME_DATA_DIR + "creatables.xml")
+        self.creatables.load()
+
+        self.map = WorldMap("Kingdom 2", 50, 50)
+        self.map.initialise()
+
+        self.creations = []
 
     def start(self):
 
-        self.state = Game.PLAYING
+        self.state = Game.STATE_PLAYING
+
+
+    def add_creation(self, new_creation : Creatable):
+        self.creations.append(new_creation)
 
     def tick(self):
 
+        if self.state != Game.STATE_PLAYING:
+            return
+
         self.tick_count += 1
 
-        self.events.add_event(Event(Event.TICK, "Tick", Event.GAME))
+        self.events.add_event(Event(Game.TICK,
+                                    "Game ticked to {0}".format(self.tick_count),
+                                    Game.TICK))
+
+        for creation in self.creations:
+            if self.inventory.is_creatable(creation):
+                creation.tick()
 
     def get_next_event(self):
 
@@ -80,19 +121,19 @@ class Game():
 
     def pause(self, is_paused: bool = True):
 
-        if self.state == Game.PAUSED and is_paused is False:
+        if self.state == Game.STATE_PAUSED and is_paused is False:
 
-            self.state = Game.PLAYING
+            self.state = Game.STATE_PLAYING
 
         else:
-            self.state = Game.PAUSED
+            self.state = Game.STATE_PAUSED
 
     def game_over(self):
 
-        if self._state != Game.GAME_OVER:
+        if self._state != Game.STATE_GAME_OVER:
             logging.info("Game Over {0}...".format(self.name))
 
-            self.state = Game.GAME_OVER
+            self.state = Game.STATE_GAME_OVER
 
     def end(self):
 
@@ -100,68 +141,9 @@ class Game():
 
         self.state = Game.END
 
-
     def save(self):
         pass
 
     def load(self):
         pass
 
-
-class Event():
-    # Event Types
-    QUIT = "quit"
-    DEFAULT = "default"
-    STATE = "state"
-    GAME = "game"
-    FLOOR = "floor"
-    BATTLE = "battle"
-
-    # Events
-    TICK = "Tick"
-    PLAYING = "playing"
-    COLLIDE = "collide"
-    INTERACT = "interact"
-    BLOCKED = "blocked"
-    SECRET = "secret"
-    TREASURE = "treasure"
-    DOOR_OPEN = "door opened"
-    DOOR_LOCKED = "door locked"
-    SWITCH = "switch"
-    FOUND_FLAG = "found_flag"
-    KEY = "key"
-    TELEPORT = "teleport"
-    GAIN_HEALTH = "gain health"
-    LOSE_HEALTH = "lose health"
-    NO_AP = "No action points"
-    KILLED_OPPONENT = "killed opponent"
-    MISSED_OPPONENT = "missed opponent"
-    DAMAGE_OPPONENT = "damaged opponent"
-    VICTORY = "victory"
-    NEXT_PLAYER = "next player"
-
-    def __init__(self, name: str, description: str = None, type: str = DEFAULT):
-        self.name = name
-        self.description = description
-        self.type = type
-
-    def __str__(self):
-        return "{0}:{1} ({2})".format(self.name, self.description, self.type)
-
-
-class EventQueue():
-    def __init__(self):
-        self.events = collections.deque()
-
-    def add_event(self, new_event: Event):
-        self.events.append(new_event)
-
-    def pop_event(self):
-        return self.events.pop()
-
-    def size(self):
-        return len(self.events)
-
-    def print(self):
-        for event in self.events:
-            print(event)

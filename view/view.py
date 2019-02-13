@@ -1,7 +1,7 @@
 import logging
 import os
 import math
-
+import random
 import pygame
 
 import model
@@ -61,9 +61,9 @@ class ImageManager:
         new_skin_name = ImageManager.DEFAULT_SKIN
         new_skin = (new_skin_name, {
 
-            model.Objects.TILE : "hexagon2.png",
-            model.Objects.TILE2: "hexagon3.png",
-            model.Objects.TILE_BASE: "hexagon_base.png",
+            model.Objects.TILE : "3dhexagon.png",
+            model.Objects.TILE2: "3dhexagon.png",
+            model.Objects.TILE_BASE: "3dhexagon_granite.png",
 
 
         })
@@ -196,16 +196,16 @@ class MainFrame(View):
 
         y += MainFrame.TITLE_HEIGHT
 
-        if self.game.state == model.Game.READY:
+        if self.game.state == model.Game.STATE_READY:
             self.game_ready.draw()
             self.surface.blit(self.game_ready.surface, (x, y))
-        elif self.game.state in (model.Game.PLAYING, model.Game.PAUSED):
+        elif self.game.state in (model.Game.STATE_PLAYING, model.Game.STATE_PAUSED):
             self.game_view.draw()
             self.surface.blit(self.game_view.surface, (x, y))
-        elif self.game.state == model.Game.BATTLE:
+        elif self.game.state == model.Game.STATE_BATTLE:
             self.battle_view.draw()
             self.surface.blit(self.battle_view.surface, (x, y))
-        elif self.game.state == model.Game.GAME_OVER:
+        elif self.game.state == model.Game.STATE_GAME_OVER:
             self.game_over.draw()
             self.surface.blit(self.game_over.surface, (x, y))
 
@@ -218,26 +218,26 @@ class MainFrame(View):
 
         # print("MainFrame event process:{0}".format(new_event))
 
-        if self.game.state == model.Game.READY:
+        if self.game.state == model.Game.STATE_READY:
             self.game_ready.process_event(new_event)
-        elif self.game.state == model.Game.PLAYING:
+        elif self.game.state == model.Game.STATE_PLAYING:
             self.game_view.process_event(new_event)
-        elif self.game.state == model.Game.BATTLE:
+        elif self.game.state == model.Game.STATE_BATTLE:
             self.battle_view.process_event(new_event)
-        elif self.game.state == model.Game.GAME_OVER:
+        elif self.game.state == model.Game.STATE_GAME_OVER:
             self.game_over.process_event(new_event)
 
         self.status_bar.process_event(new_event)
 
     def tick(self):
 
-        if self.game.state == model.Game.READY:
+        if self.game.state == model.Game.STATE_READY:
             self.game_ready.tick()
-        elif self.game.state == model.Game.PLAYING:
+        elif self.game.state == model.Game.STATE_PLAYING:
             self.game_view.tick()
-        elif self.game.state == model.Game.BATTLE:
+        elif self.game.state == model.Game.STATE_BATTLE:
             self.battle_view.tick()
-        elif self.game.state == model.Game.GAME_OVER:
+        elif self.game.state == model.Game.STATE_GAME_OVER:
             self.game_over.tick()
 
         self.status_bar.tick()
@@ -290,9 +290,9 @@ class TitleBar(View):
         if self.title_image is not None:
             self.surface.blit(self.title_image, (0, 0))
 
-        if self.game.state == model.Game.PLAYING:
+        if self.game.state == model.Game.STATE_PLAYING:
             msg = "Playing"
-        if self.game.state == model.Game.BATTLE:
+        if self.game.state == model.Game.STATE_BATTLE:
             msg = self.game.battle.battle_floor.name
         elif self.title is not None:
             msg = self.title
@@ -379,12 +379,12 @@ class StatusBar(View):
 
         self.surface.blit(self.text_box, (pane_rect.width / 4, 4))
 
-        if self.game.state == model.Game.PLAYING:
+        if self.game.state == model.Game.STATE_PLAYING:
 
             y = 8
             x = int(pane_rect.width * 3 / 4)
 
-        elif self.game.state == model.Game.PAUSED:
+        elif self.game.state == model.Game.STATE_PAUSED:
             msg = "Esc:Resume   F5:Toggle Sound   F6:Toggle Music   F4:Quit"
             draw_text(self.surface,
                       msg=msg,
@@ -395,7 +395,7 @@ class StatusBar(View):
                       size=StatusBar.STATUS_TEXT_FONT_SIZE,
                       centre=False)
 
-        elif self.game.state == model.Game.READY:
+        elif self.game.state == model.Game.STATE_READY:
             msg = "SPACE:Start   F4:Quit"
             draw_text(self.surface,
                       msg=msg,
@@ -405,7 +405,7 @@ class StatusBar(View):
                       bg_colour=StatusBar.BG_COLOUR,
                       size=StatusBar.STATUS_TEXT_FONT_SIZE,
                       centre=False)
-        elif self.game.state == model.Game.GAME_OVER:
+        elif self.game.state == model.Game.STATE_GAME_OVER:
             msg = "SPACE:Continue   F4:Quit"
             draw_text(self.surface,
                       msg=msg,
@@ -456,11 +456,12 @@ class GameView(View):
     FG_COLOUR = Colours.GOLD
     BG_COLOUR = Colours.DARK_GREY
 
-    Y_SQUASH = .5
-    TILE_ROTATE_ANGLE = 0
-    TILE_IMAGE_WIDTH = int(64)
+    Y_SQUASH = 0.33
+    TILE_ROTATE_ANGLE = 30
+    TILE_IMAGE_WIDTH = 64
     #TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
-    TILE_IMAGE_HEIGHT = int(64)
+    TILE_IMAGE_HEIGHT = 128
+    TILE_ALTITUDE_FACTOR = 4
 
     def __init__(self, width: int, height: int = 500):
         super(GameView, self).__init__()
@@ -472,22 +473,22 @@ class GameView(View):
         self.game = game
 
         self.dx = GameView.TILE_IMAGE_WIDTH * 3/4
-        self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)
+        self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2)
 
-    def model_to_view(self, x : int, y : int):
+    def model_to_view(self, x : int, y : int, z : int = 0):
 
-        view_x = x * GameView.TILE_IMAGE_WIDTH - ((y % 2) * GameView.TILE_IMAGE_WIDTH / 2)
-        view_y = y * GameView.TILE_IMAGE_HEIGHT * 3 /4
+        # view_x = x * GameView.TILE_IMAGE_WIDTH - ((y % 2) * GameView.TILE_IMAGE_WIDTH / 2)
+        # view_y = y * GameView.TILE_IMAGE_HEIGHT * 3 /4
 
         view_x = int(x * self.dx - ((1-math.cos(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3/4))
-        view_y = int(y * self.dy + ((x % 2) * self.dy/2) - ((1-math.sin(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3/4))
-
+        view_y = int(y * self.dy + ((x % 2) * self.dy/2) - ((1-math.sin(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3/4) - (z * self.dy))
 
 
         return view_x, view_y
 
 
     def draw(self):
+
         if self.game is None:
             raise ("No Game to view!")
 
@@ -511,7 +512,7 @@ class GameView(View):
 
         image = View.image_manager.get_skin_image(model.Objects.TILE2,
                                                   width=GameView.TILE_IMAGE_WIDTH,
-                                                  height=GameView.TILE_IMAGE_HEIGHT,
+                                                  height=GameView.TILE_IMAGE_HEIGHT * 2,
                                                   tick=self.tick_count)
 
 
@@ -528,21 +529,39 @@ class GameView(View):
         x = pane_rect.centerx - 32
         y += 100
 
-        width = 20
-        height = 10
+        width = 45
+        height = 45
+
+        topo = self.game.map.topo_model_pass2
 
         for tile_y in range (0, height - 1):
             if tile_y >= height - 1:
                 image = image_base
 
 
-            for tile_x in range(0, width - 1):
+            for tile_x in range(0, width - 1, 2):
+
+                a = topo[tile_x][tile_y] * GameView.TILE_ALTITUDE_FACTOR
+                image.set_alpha(250 - (a))
 
                 view_x, view_y = self.model_to_view(tile_x, tile_y)
-                self.surface.blit(image, (view_x, view_y + y))
+                self.surface.blit(image, (view_x, view_y + y - a))
 
+            for tile_x in range(1, width - 1, 2):
 
+                a = topo[tile_x][tile_y] * GameView.TILE_ALTITUDE_FACTOR
+                image.set_alpha(250 - (a))
 
+                view_x, view_y = self.model_to_view(tile_x, tile_y)
+                self.surface.blit(image, (view_x, view_y + y - a))
+
+        # view_x, view_y = self.model_to_view(0, 0, 1)
+        # self.surface.blit(image_base, (view_x, view_y + y))
+        #
+        # view_x, view_y = self.model_to_view(10, 3, 1)
+        # self.surface.blit(image_base, (view_x, view_y + y))
+        # view_x, view_y = self.model_to_view(10, 3, 2)
+        # self.surface.blit(image_base, (view_x, view_y + y))
 
 class GameOverView(View):
     FG_COLOUR = Colours.WHITE

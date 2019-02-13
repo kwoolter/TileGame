@@ -14,7 +14,7 @@ class Sounds:
 class AudioManager:
 
     DEFAULT_THEME = "default"
-    PLAYING = model.Game.PLAYING
+    PLAYING = model.Game.STATE_PLAYING
 
     RESOURCES_DIR = os.path.dirname(__file__) + "\\resources\\"
     RESOURCES_DIR_MUSIC = os.path.dirname(__file__) + "\\resources\\music\\"
@@ -101,13 +101,11 @@ class AudioManager:
 
         new_theme_name = AudioManager.DEFAULT_THEME
         new_theme = {
-            model.Event.TICK: "LTTP_Menu_Cursor.wav",
-            model.Event.BLOCKED: "LTTP_Error.wav",
-            model.Game.PLAYING: "LTTP_Rupee1.wav",
-            model.Event.TREASURE: "LTTP_Rupee1.wav",
-            model.Game.PAUSED: "LTTP_Menu_Select.wav",
-            model.Game.GAME_OVER: "LTTP_Link_Hurt.wav",
-            model.Game.READY: "LA_TrendyGame_Win.wav",
+            model.Game.TICK: "LTTP_Menu_Cursor.wav",
+            model.Game.STATE_PLAYING: "LTTP_Rupee1.wav",
+            model.Game.STATE_PAUSED: "LTTP_Menu_Select.wav",
+            model.Game.STATE_GAME_OVER: "LTTP_Link_Hurt.wav",
+            model.Game.STATE_READY: "LA_TrendyGame_Win.wav",
         }
 
         self.sound_themes[new_theme_name] = new_theme
@@ -116,10 +114,10 @@ class AudioManager:
         new_theme_name = AudioManager.DEFAULT_THEME
         new_theme = {
 
-            model.Game.GAME_OVER: "Rains Will Fall.mp3",
-            model.Game.READY: "Heroic_Age.mp3",
-            model.Game.PLAYING: "Crossing the Chasm.mp3",
-            model.Game.PAUSED: "Tabuk.mp3",
+            model.Game.STATE_GAME_OVER: "Rains Will Fall.mp3",
+            model.Game.STATE_READY: "Heroic_Age.mp3",
+            model.Game.STATE_PLAYING: "Crossing the Chasm.mp3",
+            model.Game.STATE_PAUSED: "Tabuk.mp3",
         }
 
         self.music_themes[new_theme_name] = new_theme
