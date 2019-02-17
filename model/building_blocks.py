@@ -312,8 +312,11 @@ class CreatableFactoryXML(object):
 
 
 class WorldMap:
+
     TILE_GRASS = "Grass"
     TILE_SEA = "Sea"
+    TILE_ICE = "Snow"
+    TILE_EARTH = "Earth"
 
     def __init__(self, name: str, width: int = 50, height: int = 50):
         self.name = name
@@ -328,13 +331,17 @@ class WorldMap:
         self.generate_topology()
 
         # Clear the map squares
-        self.map = [[None for y in range(0, self._height)] for x in range(0, self._width)]
+        self.map = [[WorldMap.TILE_EARTH for y in range(0, self._height)] for x in range(0, self._width)]
 
-        grass = ResourceFactory.get_resource_copy(WorldMap.TILE_GRASS)
-        self.add_objects(grass.graphic, 40)
+        res = ResourceFactory.get_resource_copy(WorldMap.TILE_GRASS)
+        self.add_objects(res.name, 40)
 
-        grass = ResourceFactory.get_resource_copy(WorldMap.TILE_SEA)
-        self.add_objects(grass.graphic, 40)
+        res = ResourceFactory.get_resource_copy(WorldMap.TILE_ICE)
+        self.add_objects(res.name, 40)
+
+        res = ResourceFactory.get_resource_copy(WorldMap.TILE_SEA)
+        self.add_objects(res.name, 40)
+
 
     def generate_topology(self):
 
@@ -468,6 +475,8 @@ class WorldMap:
         self.map[x][y] = c
 
     def get_altitude(self, x: int, y: int):
+        if self.is_valid_xy(x,y) is False:
+            raise Exception("Trying to get altitude at ({0},{1}) which is outside of the world!".format(x, y))
         return self.topo_model_pass2[x][y]
 
     # Add objects to random tiles
@@ -476,12 +485,5 @@ class WorldMap:
         for i in range(0, count):
             x = random.randint(0, self.width - 1)
             y = random.randint(0, self.height - 1)
-            if self.get(x, y) is None:
-                self.set(x, y, object_type)
+            self.set(x, y, object_type)
 
-
-class MapSquare:
-
-    def __init__(self, content: str, altitude: float = 0.0):
-        self.content = content
-        self.altitude = altitude

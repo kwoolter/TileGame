@@ -1,8 +1,6 @@
 import logging
-import os
 import math
-import random
-import pygame
+import os
 
 import model
 from .graphics import *
@@ -61,10 +59,10 @@ class ImageManager:
         new_skin_name = ImageManager.DEFAULT_SKIN
         new_skin = (new_skin_name, {
 
-            model.Objects.TILE : "3dhexagon.png",
-            model.Objects.TILE2: "3dhexagon.png",
-            model.Objects.TILE_BASE: "3dhexagon_granite.png",
-
+            model.WorldMap.TILE_GRASS: "3dhexagonGreen.png",
+            model.WorldMap.TILE_SEA: "3dhexagonLightBlue.png",
+            model.WorldMap.TILE_ICE: "3dhexagonWhite.png",
+            model.WorldMap.TILE_EARTH: "3dhexagonLightOrange.png",
 
         })
 
@@ -160,7 +158,7 @@ class MainFrame(View):
         super(MainFrame, self).initialise()
 
         self.surface = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF | pygame.HWACCEL)
-        #self.surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        # self.surface = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
 
         os.environ["SDL_VIDEO_CENTERED"] = "1"
         pygame.init()
@@ -308,7 +306,6 @@ class TitleBar(View):
 
 
 class StatusBar(View):
-
     FG_COLOUR = Colours.WHITE
     BG_COLOUR = Colours.BLACK
     ICON_WIDTH = 40
@@ -456,12 +453,14 @@ class GameView(View):
     FG_COLOUR = Colours.GOLD
     BG_COLOUR = Colours.DARK_GREY
 
-    Y_SQUASH = 0.33
+    Y_SQUASH = 0.75
     TILE_ROTATE_ANGLE = 30
-    TILE_IMAGE_WIDTH = 64
-    #TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
+    TILE_IMAGE_WIDTH = 128
+    # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
     TILE_ALTITUDE_FACTOR = 4
+    TILE_ALTITUDE_ALPHA_BASE = 200
+    TILE_ALTITUDE_ALPHA_FACTOR = 0
 
     def __init__(self, width: int, height: int = 500):
         super(GameView, self).__init__()
@@ -472,20 +471,44 @@ class GameView(View):
     def initialise(self, game: model.Game):
         self.game = game
 
-        self.dx = GameView.TILE_IMAGE_WIDTH * 3/4
+        self.dx = GameView.TILE_IMAGE_WIDTH * 3 / 4
         self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2)
 
-    def model_to_view(self, x : int, y : int, z : int = 0):
+        self.view_tiles_width = 14
+        self.view_tiles_height = 12
+
+        self.set_view_origin(0, 0)
+
+    def model_to_view(self, x: int, y: int, z: int = 0):
 
         # view_x = x * GameView.TILE_IMAGE_WIDTH - ((y % 2) * GameView.TILE_IMAGE_WIDTH / 2)
         # view_y = y * GameView.TILE_IMAGE_HEIGHT * 3 /4
 
-        view_x = int(x * self.dx - ((1-math.cos(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3/4))
-        view_y = int(y * self.dy + ((x % 2) * self.dy/2) - ((1-math.sin(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3/4) - (z * self.dy))
-
+        view_x = int(x * self.dx - ((1 - math.cos(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3 / 4))
+        view_y = int(y * self.dy + ((x % 2) * self.dy / 2) - (
+                (1 - math.sin(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3 / 4) - (z * self.dy))
 
         return view_x, view_y
 
+    def set_view_origin(self, x: int = 0, y: int = 0, relative: bool = False):
+
+        if relative == False:
+            if self.game.map.is_valid_xy(x, y) is False or \
+                    self.game.map.is_valid_xy(x + self.view_tiles_width, y + self.view_tiles_height) is False:
+                raise Exception(
+                    "Trying to set view origin at ({0},{1}) which is out of bounds of the model".format(x, y))
+            self.vx = x
+            self.vy = y
+        else:
+            if self.game.map.is_valid_xy(self.vx + x, self.vy + y) is False or \
+                self.game.map.is_valid_xy(self.view_tiles_width + self.vx + x, self.view_tiles_height + self.vy + y) is False:
+                raise Exception(
+                    "Trying to set view origin at ({0},{1}) which is out of bounds of the model".format(self.vx + x,
+                                                                                                        self.vy + y))
+            self.vx += x
+            self.vy += y
+
+        print("View origin set to ({0},{1})".format(self.vx, self.vy))
 
     def draw(self):
 
@@ -509,51 +532,50 @@ class GameView(View):
                   fg_colour=GameReadyView.FG_COLOUR,
                   bg_colour=GameReadyView.BG_COLOUR)
 
-
-        image = View.image_manager.get_skin_image(model.Objects.TILE2,
-                                                  width=GameView.TILE_IMAGE_WIDTH,
-                                                  height=GameView.TILE_IMAGE_HEIGHT * 2,
-                                                  tick=self.tick_count)
+        x = 32
+        y += 300
 
 
-        image = pygame.transform.scale(image, (GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
-        #image = pygame.transform.rotate(image, GameView.TILE_ROTATE_ANGLE)
-
-        image_base = View.image_manager.get_skin_image(model.Objects.TILE_BASE,
-                                                  width=GameView.TILE_IMAGE_WIDTH,
-                                                  height=GameView.TILE_IMAGE_HEIGHT,
-                                                  tick=self.tick_count)
-
-        image_base = pygame.transform.scale(image_base, (GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
-
-        x = pane_rect.centerx - 32
-        y += 100
-
-        width = 45
-        height = 45
-
-        topo = self.game.map.topo_model_pass2
-
-        for tile_y in range (0, height - 1):
-            if tile_y >= height - 1:
-                image = image_base
 
 
-            for tile_x in range(0, width - 1, 2):
+        for tile_y in range(0, self.view_tiles_height - 1):
 
-                a = topo[tile_x][tile_y] * GameView.TILE_ALTITUDE_FACTOR
-                image.set_alpha(250 - (a))
+            for tile_x in range(0, self.view_tiles_width - 1, 2):
+                tile = self.game.map.get(tile_x + self.vx, tile_y + self.vy)
+
+                image = View.image_manager.get_skin_image(tile,
+                                                          width=GameView.TILE_IMAGE_WIDTH,
+                                                          height=GameView.TILE_IMAGE_HEIGHT * 2,
+                                                          tick=self.tick_count)
+
+                image = pygame.transform.scale(image, (
+                    GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
+
+                # image.set_alpha(GameView.TILE_ALTITUDE_ALPHA_BASE + a * GameView.TILE_ALTITUDE_ALPHA_FACTOR)
+
+                a = self.game.map.get_altitude(tile_x + self.vx, tile_y + self.vy) * GameView.TILE_ALTITUDE_FACTOR
 
                 view_x, view_y = self.model_to_view(tile_x, tile_y)
-                self.surface.blit(image, (view_x, view_y + y - a))
+                self.surface.blit(image, (view_x + x, view_y + y - a))
 
-            for tile_x in range(1, width - 1, 2):
+            for tile_x in range(1, self.view_tiles_width - 2, 2):
+                tile = self.game.map.get(tile_x + self.vx, tile_y + self.vy)
 
-                a = topo[tile_x][tile_y] * GameView.TILE_ALTITUDE_FACTOR
-                image.set_alpha(250 - (a))
+                image = View.image_manager.get_skin_image(tile,
+                                                          width=GameView.TILE_IMAGE_WIDTH,
+                                                          height=GameView.TILE_IMAGE_HEIGHT * 2,
+                                                          tick=self.tick_count)
+
+                image = pygame.transform.scale(image, (
+                    GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
+
+                # image.set_alpha(GameView.TILE_ALTITUDE_ALPHA_BASE + a * GameView.TILE_ALTITUDE_ALPHA_FACTOR)
+
+                a = self.game.map.get_altitude(tile_x + self.vx, tile_y + self.vy) * GameView.TILE_ALTITUDE_FACTOR
+                #image.set_alpha(GameView.TILE_ALTITUDE_ALPHA_BASE + a * GameView.TILE_ALTITUDE_ALPHA_FACTOR)
 
                 view_x, view_y = self.model_to_view(tile_x, tile_y)
-                self.surface.blit(image, (view_x, view_y + y - a))
+                self.surface.blit(image, (view_x + x, view_y + y - a))
 
         # view_x, view_y = self.model_to_view(0, 0, 1)
         # self.surface.blit(image_base, (view_x, view_y + y))
@@ -562,6 +584,7 @@ class GameView(View):
         # self.surface.blit(image_base, (view_x, view_y + y))
         # view_x, view_y = self.model_to_view(10, 3, 2)
         # self.surface.blit(image_base, (view_x, view_y + y))
+
 
 class GameOverView(View):
     FG_COLOUR = Colours.WHITE

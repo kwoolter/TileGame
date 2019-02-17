@@ -94,8 +94,18 @@ class Controller:
 
                         try:
 
-                            if event.key == Controller.KEY_PAUSE:
+                            if event.key == K_RIGHT:
+                                self.view.game_view.set_view_origin(1, 0 , relative = True)
+                            elif event.key == K_LEFT:
+                                self.view.game_view.set_view_origin(-1, 0 , relative = True)
+                            elif event.key == K_UP:
+                                self.view.game_view.set_view_origin(0, 1 , relative = True)
+                            elif event.key == K_DOWN:
+                                self.view.game_view.set_view_origin(0, -1 , relative = True)
+                            elif event.key == Controller.KEY_PAUSE:
                                 self.game.pause()
+                            elif event.key == K_F12:
+                                self.game.new_map()
                             elif event.key == Controller.KEY_GAME_OVER:
                                 self.game.game_over()
 
@@ -127,9 +137,11 @@ class Controller:
                 # QUIT event
                 elif event.type == QUIT:
                     loop = False
-
-            self.view.draw()
-            self.view.update()
+            try:
+                self.view.draw()
+                self.view.update()
+            except Exception as err:
+                print(str(err))
 
             FPSCLOCK.tick(50)
 

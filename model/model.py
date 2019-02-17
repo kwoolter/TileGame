@@ -93,6 +93,9 @@ class Game:
     def add_creation(self, new_creation : Creatable):
         self.creations.append(new_creation)
 
+    def new_map(self):
+        self.map.generate_topology()
+
     def tick(self):
 
         if self.state != Game.STATE_PLAYING:
