@@ -99,9 +99,9 @@ class Controller:
                             elif event.key == K_LEFT:
                                 self.view.game_view.set_view_origin(-1, 0 , relative = True)
                             elif event.key == K_UP:
-                                self.view.game_view.set_view_origin(0, 1 , relative = True)
-                            elif event.key == K_DOWN:
                                 self.view.game_view.set_view_origin(0, -1 , relative = True)
+                            elif event.key == K_DOWN:
+                                self.view.game_view.set_view_origin(0, 1 , relative = True)
                             elif event.key == Controller.KEY_PAUSE:
                                 self.game.pause()
                             elif event.key == K_F12:

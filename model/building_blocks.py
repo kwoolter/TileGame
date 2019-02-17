@@ -315,8 +315,11 @@ class WorldMap:
 
     TILE_GRASS = "Grass"
     TILE_SEA = "Sea"
-    TILE_ICE = "Snow"
+    TILE_SNOW = "Snow"
+    TILE_ICE = "Ice"
     TILE_EARTH = "Earth"
+    TILE_SAND = "Sand"
+    TILE_ROCK = "Rock"
 
     def __init__(self, name: str, width: int = 50, height: int = 50):
         self.name = name
@@ -333,26 +336,44 @@ class WorldMap:
         # Clear the map squares
         self.map = [[WorldMap.TILE_EARTH for y in range(0, self._height)] for x in range(0, self._width)]
 
-        res = ResourceFactory.get_resource_copy(WorldMap.TILE_GRASS)
-        self.add_objects(res.name, 40)
-
-        res = ResourceFactory.get_resource_copy(WorldMap.TILE_ICE)
-        self.add_objects(res.name, 40)
-
-        res = ResourceFactory.get_resource_copy(WorldMap.TILE_SEA)
-        self.add_objects(res.name, 40)
+        a_mean = self.altitude_mean
+        a_std = self.altitude_std
+        for y in range(0, self.height):
+            for x in range(0, self._width):
+                a = self.get_altitude(x,y)
+                if a == 0:
+                    self.set(x,y,WorldMap.TILE_SEA)
+                elif a > a_mean + (a_std * 2.3):
+                    self.set(x, y, WorldMap.TILE_SNOW)
+                elif a > a_mean + (a_std * 2.0):
+                    self.set(x, y, WorldMap.TILE_ICE)
+                elif a > a_mean + (a_std * 1.5):
+                    self.set(x, y, WorldMap.TILE_ROCK)
+                elif a < a_std/3:
+                    self.set(x, y, WorldMap.TILE_SAND)
+                elif a < a_mean + a_std * 0.75:
+                    self.set(x, y, WorldMap.TILE_GRASS)
+        #
+        # res = ResourceFactory.get_resource_copy(WorldMap.TILE_GRASS)
+        # self.add_objects(res.name, 40)
+        #
+        # res = ResourceFactory.get_resource_copy(WorldMap.TILE_ICE)
+        # self.add_objects(res.name, 40)
+        #
+        # res = ResourceFactory.get_resource_copy(WorldMap.TILE_SEA)
+        # self.add_objects(res.name, 40)
 
 
     def generate_topology(self):
 
         # Topo controls
-        MAX_ALTITUDE = 10.0
-        MIN_ALTITUDE_CLIP_FACTOR = 0.5
+        MAX_ALTITUDE = 10.0 # Highest Altitude
+        MIN_ALTITUDE_CLIP_FACTOR = 0.75 # How many STDEV below the mean do we create a floor
         ALTITUDE_OFFSET = 0.0
-        MIN_ALTITUDE = 0.0
-        MAX_SLOPE = MAX_ALTITUDE * 0.15
-        MIN_SLOPE = MAX_SLOPE * -1.0
-        MAX_SLOPE_DELTA = MAX_SLOPE * 2.0
+        MIN_ALTITUDE = 0.0 # Lowest Altitude
+        MAX_SLOPE = MAX_ALTITUDE * 0.15 # Maximum slope
+        MIN_SLOPE = MAX_SLOPE * -1.0 # Minimum slope
+        MAX_SLOPE_DELTA = MAX_SLOPE * 2.0 # How much can the slope change
 
         # Clear the topo model
         topo_model_pass1 = [[None for y in range(0, self._height)] for x in range(0, self._width)]
@@ -429,6 +450,7 @@ class WorldMap:
         std = numpy.std(a)
         threshold = avg - (std * MIN_ALTITUDE_CLIP_FACTOR)
         a[a < threshold] = threshold
+        a[a!=0] -= threshold
         self.topo_model_pass2 = a.tolist()
 
         print("Pass 3: applying altitude floor of {0:.3}...".format(threshold))
@@ -478,6 +500,18 @@ class WorldMap:
         if self.is_valid_xy(x,y) is False:
             raise Exception("Trying to get altitude at ({0},{1}) which is outside of the world!".format(x, y))
         return self.topo_model_pass2[x][y]
+
+    @property
+    def altitude_max(self):
+        return numpy.max(self.topo_model_pass2)
+
+    @property
+    def altitude_mean(self):
+        return numpy.mean(self.topo_model_pass2)
+
+    @property
+    def altitude_std(self):
+        return numpy.std(self.topo_model_pass2)
 
     # Add objects to random tiles
     def add_objects(self, object_type, count: int = 20):

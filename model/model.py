@@ -94,7 +94,7 @@ class Game:
         self.creations.append(new_creation)
 
     def new_map(self):
-        self.map.generate_topology()
+        self.map.initialise()
 
     def tick(self):
 

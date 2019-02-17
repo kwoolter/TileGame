@@ -13,5 +13,8 @@ Large Wooden House,Large Wooden House,Structure,M
 Small Brick House,Small Brick House,Structure,b
 Earth,Earth,Material,.
 Snow,Snow,Material,*
+Ice,Ice,Material,%
 Grass,Grass,Material,!
 Sea,Sea,Material,~
+Sand,Sand,Material,.
+Rock,Rock,Material,^

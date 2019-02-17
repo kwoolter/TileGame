@@ -61,8 +61,11 @@ class ImageManager:
 
             model.WorldMap.TILE_GRASS: "3dhexagonGreen.png",
             model.WorldMap.TILE_SEA: "3dhexagonLightBlue.png",
-            model.WorldMap.TILE_ICE: "3dhexagonWhite.png",
+            model.WorldMap.TILE_ICE: "3dhexagonGrey.png",
+            model.WorldMap.TILE_ROCK: "3dhexagonDarkGrey.png",
+            model.WorldMap.TILE_SNOW: "3dhexagonWhite.png",
             model.WorldMap.TILE_EARTH: "3dhexagonLightOrange.png",
+            model.WorldMap.TILE_SAND: "3dhexagonYellow.png",
 
         })
 
@@ -458,7 +461,7 @@ class GameView(View):
     TILE_IMAGE_WIDTH = 128
     # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
-    TILE_ALTITUDE_FACTOR = 4
+    TILE_ALTITUDE_FACTOR = 5
     TILE_ALTITUDE_ALPHA_BASE = 200
     TILE_ALTITUDE_ALPHA_FACTOR = 0
 
@@ -474,8 +477,8 @@ class GameView(View):
         self.dx = GameView.TILE_IMAGE_WIDTH * 3 / 4
         self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2)
 
-        self.view_tiles_width = 14
-        self.view_tiles_height = 12
+        self.view_tiles_width = 16
+        self.view_tiles_height = 13
 
         self.set_view_origin(0, 0)
 
