@@ -320,6 +320,27 @@ class WorldMap:
     TILE_EARTH = "Earth"
     TILE_SAND = "Sand"
     TILE_ROCK = "Rock"
+    TILE_TREE = "Tree"
+    TILE_SCRUB = "Scrub"
+
+    STRUCTURE_SMALL_HOUSE = "Small Wooden House"
+    STRUCTURE_BIG_HOUSE = "Large Wooden House"
+    STRUCTURE_CAVE = "Cave"
+    STRUCTURE_TENT = "Tent"
+    STRUCTURE_FORT = "Fort"
+
+    topo_zones = {
+
+        TILE_SAND : -0.6,
+        TILE_GRASS : 0.4,
+        TILE_SCRUB: 0.9,
+        TILE_TREE: 1.2,
+        TILE_EARTH: 1.5,
+        TILE_ROCK: 1.9,
+        TILE_ICE: 2.4,
+        TILE_SNOW: 2.5
+
+    }
 
     def __init__(self, name: str, width: int = 50, height: int = 50):
         self.name = name
@@ -340,19 +361,16 @@ class WorldMap:
         a_std = self.altitude_std
         for y in range(0, self.height):
             for x in range(0, self._width):
+
                 a = self.get_altitude(x,y)
                 if a == 0:
-                    self.set(x,y,WorldMap.TILE_SEA)
-                elif a > a_mean + (a_std * 2.3):
-                    self.set(x, y, WorldMap.TILE_SNOW)
-                elif a > a_mean + (a_std * 2.0):
-                    self.set(x, y, WorldMap.TILE_ICE)
-                elif a > a_mean + (a_std * 1.5):
-                    self.set(x, y, WorldMap.TILE_ROCK)
-                elif a < a_std/3:
-                    self.set(x, y, WorldMap.TILE_SAND)
-                elif a < a_mean + a_std * 0.75:
-                    self.set(x, y, WorldMap.TILE_GRASS)
+                    tile = WorldMap.TILE_SEA
+                else:
+                    for tile, altitude in WorldMap.topo_zones.items():
+                        if a < a_mean + (a_std * altitude):
+                            break
+                self.set(x, y, tile)
+
         #
         # res = ResourceFactory.get_resource_copy(WorldMap.TILE_GRASS)
         # self.add_objects(res.name, 40)

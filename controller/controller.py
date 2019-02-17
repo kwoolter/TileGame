@@ -94,14 +94,39 @@ class Controller:
 
                         try:
 
-                            if event.key == K_RIGHT:
-                                self.view.game_view.set_view_origin(1, 0 , relative = True)
+                            if event.key == K_HOME:
+                                self.view.game_view.set_active()
+                            elif event.key == K_RIGHT:
+                                self.view.game_view.set_active(1, 0 , relative = True)
                             elif event.key == K_LEFT:
-                                self.view.game_view.set_view_origin(-1, 0 , relative = True)
+                                self.view.game_view.set_active(-1, 0 , relative = True)
                             elif event.key == K_UP:
-                                self.view.game_view.set_view_origin(0, -1 , relative = True)
+                                self.view.game_view.set_active(0, -1 , relative = True)
                             elif event.key == K_DOWN:
+                                self.view.game_view.set_active(0, 1 , relative = True)
+                            elif event.key == K_INSERT:
+                                self.view.game_view.set_view_origin(1, 0 , relative = True)
+                            elif event.key == K_DELETE:
+                                self.view.game_view.set_view_origin(-1, 0 , relative = True)
+                            elif event.key == K_PAGEUP:
+                                self.view.game_view.set_view_origin(0, -1 , relative = True)
+                            elif event.key == K_PAGEDOWN:
                                 self.view.game_view.set_view_origin(0, 1 , relative = True)
+                            elif event.key == K_F1:
+                                x,y = self.view.game_view.active_xy
+                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_SMALL_HOUSE, x, y)
+                            elif event.key == K_F2:
+                                x,y = self.view.game_view.active_xy
+                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_BIG_HOUSE, x, y)
+                            elif event.key == K_F3:
+                                x,y = self.view.game_view.active_xy
+                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_CAVE, x, y)
+                            elif event.key == K_F4:
+                                x,y = self.view.game_view.active_xy
+                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_TENT, x, y)
+                            elif event.key == K_F5:
+                                x,y = self.view.game_view.active_xy
+                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_FORT, x, y)
                             elif event.key == Controller.KEY_PAUSE:
                                 self.game.pause()
                             elif event.key == K_F12:

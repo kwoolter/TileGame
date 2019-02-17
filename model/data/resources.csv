@@ -15,6 +15,11 @@ Earth,Earth,Material,.
 Snow,Snow,Material,*
 Ice,Ice,Material,%
 Grass,Grass,Material,!
+Scrub,Scrub,Material,$
 Sea,Sea,Material,~
 Sand,Sand,Material,.
 Rock,Rock,Material,^
+Tree,Tree,Material,T
+Cave,Cave,Structure,c
+Tent,Tent,Structure,^
+Fort,Fort,Structure,F

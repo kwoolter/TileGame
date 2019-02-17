@@ -83,15 +83,27 @@ class Game:
         self.map = WorldMap("Kingdom 2", 50, 50)
         self.map.initialise()
 
-        self.creations = []
+        self.creations = {}
 
     def start(self):
 
         self.state = Game.STATE_PLAYING
 
 
-    def add_creation(self, new_creation : Creatable):
-        self.creations.append(new_creation)
+    def add_creation(self, new_creation : Creatable, x : int = 0, y : int= 0):
+        self.creations[(x,y)] = new_creation
+
+    def add_creation_by_name(self, new_creation_name : str, x : int = 0, y : int= 0):
+        new_creation = self.creatables.get_creatable_copy(new_creation_name)
+        self.creations[(x,y)] = new_creation
+
+        print("Added creation {0} at ({1},{2})".format(new_creation_name, x, y))
+
+    def get_creation(self, x : int, y : int):
+        if (x,y) in self.creations.keys():
+            return self.creations[(x,y)]
+        else:
+            return None
 
     def new_map(self):
         self.map.initialise()
@@ -107,7 +119,7 @@ class Game:
                                     "Game ticked to {0}".format(self.tick_count),
                                     Game.TICK))
 
-        for creation in self.creations:
+        for creation in self.creations.values():
             if self.inventory.is_creatable(creation):
                 creation.tick()
 

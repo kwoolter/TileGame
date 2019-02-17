@@ -1,5 +1,4 @@
 import logging
-import math
 import os
 
 import model
@@ -59,13 +58,21 @@ class ImageManager:
         new_skin_name = ImageManager.DEFAULT_SKIN
         new_skin = (new_skin_name, {
 
-            model.WorldMap.TILE_GRASS: "3dhexagonGreen.png",
-            model.WorldMap.TILE_SEA: "3dhexagonLightBlue.png",
+            model.WorldMap.TILE_GRASS: "3dhexagonLightGreen.png",
+            model.WorldMap.TILE_SCRUB: "3dhexagonGreen.png",
+            model.WorldMap.TILE_TREE: "3dhexagonDarkGreen.png",
+            model.WorldMap.TILE_SEA: "3dhexagonBlue.png",
             model.WorldMap.TILE_ICE: "3dhexagonGrey.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGrey.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhite.png",
-            model.WorldMap.TILE_EARTH: "3dhexagonLightOrange.png",
-            model.WorldMap.TILE_SAND: "3dhexagonYellow.png",
+            model.WorldMap.TILE_EARTH: "3dhexagonBrown.png",
+            model.WorldMap.TILE_SAND: "3dhexagonSand.png",
+            GameView.TILE_HIGHLIGHT: "3dhexagonRed.png",
+            model.WorldMap.STRUCTURE_SMALL_HOUSE:"SmallHouse2.png",
+            model.WorldMap.STRUCTURE_BIG_HOUSE: "BigHouse.png",
+            model.WorldMap.STRUCTURE_CAVE: "Cave.png",
+            model.WorldMap.STRUCTURE_TENT: "Tent.png",
+            model.WorldMap.STRUCTURE_FORT: "Fort.png",
 
         })
 
@@ -456,12 +463,15 @@ class GameView(View):
     FG_COLOUR = Colours.GOLD
     BG_COLOUR = Colours.DARK_GREY
 
+    TILE_HIGHLIGHT = "Highlight"
+    TILE_HOUSE = "House"
+
     Y_SQUASH = 0.75
     TILE_ROTATE_ANGLE = 30
     TILE_IMAGE_WIDTH = 128
     # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
-    TILE_ALTITUDE_FACTOR = 5
+    TILE_ALTITUDE_FACTOR = 6
     TILE_ALTITUDE_ALPHA_BASE = 200
     TILE_ALTITUDE_ALPHA_FACTOR = 0
 
@@ -478,18 +488,17 @@ class GameView(View):
         self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2)
 
         self.view_tiles_width = 16
-        self.view_tiles_height = 13
+        self.view_tiles_height = 14
 
         self.set_view_origin(0, 0)
+        self.set_active()
 
     def model_to_view(self, x: int, y: int, z: int = 0):
 
-        # view_x = x * GameView.TILE_IMAGE_WIDTH - ((y % 2) * GameView.TILE_IMAGE_WIDTH / 2)
-        # view_y = y * GameView.TILE_IMAGE_HEIGHT * 3 /4
+        a = self.game.map.get_altitude(x, y) * GameView.TILE_ALTITUDE_FACTOR
 
-        view_x = int(x * self.dx - ((1 - math.cos(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3 / 4))
-        view_y = int(y * self.dy + ((x % 2) * self.dy / 2) - (
-                (1 - math.sin(GameView.TILE_ROTATE_ANGLE)) * GameView.TILE_IMAGE_WIDTH * 3 / 4) - (z * self.dy))
+        view_x = int((x - self.view_origin_x) * self.dx - (GameView.TILE_IMAGE_WIDTH * 3 / 4))
+        view_y = int((y - self.view_origin_y) * self.dy + ((x % 2) * self.dy / 2) - (z * self.dy) - a)
 
         return view_x, view_y
 
@@ -500,18 +509,53 @@ class GameView(View):
                     self.game.map.is_valid_xy(x + self.view_tiles_width, y + self.view_tiles_height) is False:
                 raise Exception(
                     "Trying to set view origin at ({0},{1}) which is out of bounds of the model".format(x, y))
-            self.vx = x
-            self.vy = y
+            self.view_origin_x = x
+            self.view_origin_y = y
         else:
-            if self.game.map.is_valid_xy(self.vx + x, self.vy + y) is False or \
-                self.game.map.is_valid_xy(self.view_tiles_width + self.vx + x, self.view_tiles_height + self.vy + y) is False:
+            if self.game.map.is_valid_xy(self.view_origin_x + x, self.view_origin_y + y) is False or \
+                    self.game.map.is_valid_xy(self.view_tiles_width + self.view_origin_x + x,
+                                              self.view_tiles_height + self.view_origin_y + y) is False:
                 raise Exception(
-                    "Trying to set view origin at ({0},{1}) which is out of bounds of the model".format(self.vx + x,
-                                                                                                        self.vy + y))
-            self.vx += x
-            self.vy += y
+                    "Trying to set view origin at ({0},{1}) which is out of bounds of the model".format(self.view_origin_x + x,
+                                                                                                        self.view_origin_y + y))
+            self.view_origin_x += x
+            self.view_origin_y += y
 
-        print("View origin set to ({0},{1})".format(self.vx, self.vy))
+        print("View origin set to ({0},{1})".format(self.view_origin_x, self.view_origin_y))
+
+    def set_active(self, x: int = 0, y: int = 0, relative: bool = False):
+
+        if (x,y) == (0,0):
+            new_x = int(self.view_origin_x + (self.view_tiles_width-1)/2)
+            new_y = int(self.view_origin_y + (self.view_tiles_height-1)/2)
+        elif relative is False:
+            new_x = x
+            new_y = y
+        else:
+            new_x = self.active_x + x
+            new_y = self.active_y + y
+
+        if self.game.map.is_valid_xy(new_x, new_y) is False:
+            raise Exception(
+                "Trying to set active tile at ({0},{1}) which is out of bounds of the view".format(new_x, new_y))
+
+        self.active_y = new_y
+        self.active_x = new_x
+        print("Set active tile to ({0},{1})".format(self.active_x, self.active_y))
+
+        if self.active_x < self.view_origin_x:
+            self.set_view_origin(-1,0, relative=True)
+        elif self.active_x > (self.view_origin_x + self.view_tiles_width - 3):
+            self.set_view_origin(1, 0, relative=True)
+
+        if self.active_y < self.view_origin_y:
+            self.set_view_origin(0, -1, relative=True)
+        elif self.active_y > (self.view_origin_y + self.view_tiles_height - 3):
+            self.set_view_origin(0, 1, relative=True)
+
+    @property
+    def active_xy(self):
+        return (self.active_x, self.active_y)
 
     def draw(self):
 
@@ -535,58 +579,60 @@ class GameView(View):
                   fg_colour=GameReadyView.FG_COLOUR,
                   bg_colour=GameReadyView.BG_COLOUR)
 
-        x = 32
-        y += 300
+        x = 0
+        y += 30
 
+        highlight_image = View.image_manager.get_skin_image(GameView.TILE_HIGHLIGHT,
+                                                            width=GameView.TILE_IMAGE_WIDTH,
+                                                            height=GameView.TILE_IMAGE_HEIGHT * 2,
+                                                            tick=self.tick_count)
 
+        highlight_image = pygame.transform.scale(highlight_image, (
+            GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
 
+        highlight_image.set_alpha(150)
 
-        for tile_y in range(0, self.view_tiles_height - 1):
+        for tile_y in range(0, self.view_tiles_height):
 
-            for tile_x in range(0, self.view_tiles_width - 1, 2):
-                tile = self.game.map.get(tile_x + self.vx, tile_y + self.vy)
+            map_y = tile_y + self.view_origin_y
 
-                image = View.image_manager.get_skin_image(tile,
-                                                          width=GameView.TILE_IMAGE_WIDTH,
-                                                          height=GameView.TILE_IMAGE_HEIGHT * 2,
-                                                          tick=self.tick_count)
+            for i in range(2):
 
-                image = pygame.transform.scale(image, (
-                    GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
+                for tile_x in range(0, self.view_tiles_width, 2):
 
-                # image.set_alpha(GameView.TILE_ALTITUDE_ALPHA_BASE + a * GameView.TILE_ALTITUDE_ALPHA_FACTOR)
+                    # Always draw the
+                    xx = self.view_origin_x % 2 + i
 
-                a = self.game.map.get_altitude(tile_x + self.vx, tile_y + self.vy) * GameView.TILE_ALTITUDE_FACTOR
+                    map_x = tile_x + self.view_origin_x + xx
 
-                view_x, view_y = self.model_to_view(tile_x, tile_y)
-                self.surface.blit(image, (view_x + x, view_y + y - a))
+                    tile = self.game.map.get(map_x, map_y)
 
-            for tile_x in range(1, self.view_tiles_width - 2, 2):
-                tile = self.game.map.get(tile_x + self.vx, tile_y + self.vy)
+                    image = View.image_manager.get_skin_image(tile,
+                                                              width=GameView.TILE_IMAGE_WIDTH,
+                                                              height=GameView.TILE_IMAGE_HEIGHT * 2,
+                                                              tick=self.tick_count)
 
-                image = View.image_manager.get_skin_image(tile,
-                                                          width=GameView.TILE_IMAGE_WIDTH,
-                                                          height=GameView.TILE_IMAGE_HEIGHT * 2,
-                                                          tick=self.tick_count)
+                    image = pygame.transform.scale(image, (
+                        GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
 
-                image = pygame.transform.scale(image, (
-                    GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
+                    view_x, view_y = self.model_to_view(map_x, map_y)
+                    self.surface.blit(image, (view_x + x, view_y + y))
 
-                # image.set_alpha(GameView.TILE_ALTITUDE_ALPHA_BASE + a * GameView.TILE_ALTITUDE_ALPHA_FACTOR)
+                    if (map_x, map_y) == (self.active_x, self.active_y):
+                        self.surface.blit(highlight_image, (view_x + x, view_y + y))
 
-                a = self.game.map.get_altitude(tile_x + self.vx, tile_y + self.vy) * GameView.TILE_ALTITUDE_FACTOR
-                #image.set_alpha(GameView.TILE_ALTITUDE_ALPHA_BASE + a * GameView.TILE_ALTITUDE_ALPHA_FACTOR)
+                    creation = self.game.get_creation(map_x,map_y)
+                    if creation is not None:
+                        image = View.image_manager.get_skin_image(creation.name,
+                                                                  width=GameView.TILE_IMAGE_WIDTH,
+                                                                  height=GameView.TILE_IMAGE_HEIGHT * 2,
+                                                                  tick=self.tick_count)
 
-                view_x, view_y = self.model_to_view(tile_x, tile_y)
-                self.surface.blit(image, (view_x + x, view_y + y - a))
+                        image = pygame.transform.scale(image, (
+                            GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
 
-        # view_x, view_y = self.model_to_view(0, 0, 1)
-        # self.surface.blit(image_base, (view_x, view_y + y))
-        #
-        # view_x, view_y = self.model_to_view(10, 3, 1)
-        # self.surface.blit(image_base, (view_x, view_y + y))
-        # view_x, view_y = self.model_to_view(10, 3, 2)
-        # self.surface.blit(image_base, (view_x, view_y + y))
+                        view_x, view_y = self.model_to_view(map_x, map_y, 1)
+                        self.surface.blit(image, (view_x, view_y + y))
 
 
 class GameOverView(View):

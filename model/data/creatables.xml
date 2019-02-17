@@ -119,4 +119,70 @@
             </resource>
         </outputs>
     </creatable>
+    <creatable id="Cave">
+        <name>Cave</name>
+        <description>A small cave</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Tent">
+        <name>Tent</name>
+        <description>A small tent</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Fort">
+        <name>Fort</name>
+        <description>A small fort</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
 </creatables>
