@@ -486,6 +486,7 @@ class GameView(View):
     Y_SQUASH = 0.75
     TILE_ROTATE_ANGLE = 30
     TILE_IMAGE_WIDTH = 128
+    CREATION_IMAGE_WIDTH = 96
     # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
     TILE_ALTITUDE_FACTOR = 6
@@ -597,15 +598,12 @@ class GameView(View):
                   bg_colour=GameReadyView.BG_COLOUR)
 
         x = 0
-        y += 30
+        y += 30 + GameView.TILE_IMAGE_WIDTH
 
         highlight_image = View.image_manager.get_skin_image(GameView.TILE_HIGHLIGHT,
                                                             width=GameView.TILE_IMAGE_WIDTH,
-                                                            height=GameView.TILE_IMAGE_HEIGHT * 2,
+                                                            height=int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH),
                                                             tick=self.tick_count)
-
-        highlight_image = pygame.transform.scale(highlight_image, (
-            GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
 
         highlight_image.set_alpha(150)
 
@@ -626,29 +624,24 @@ class GameView(View):
 
                     image = View.image_manager.get_skin_image(tile,
                                                               width=GameView.TILE_IMAGE_WIDTH,
-                                                              height=GameView.TILE_IMAGE_HEIGHT * 2,
+                                                              height=int(GameView.TILE_IMAGE_HEIGHT* GameView.Y_SQUASH),
                                                               tick=self.tick_count)
 
-                    image = pygame.transform.scale(image, (
-                        GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
-
                     view_x, view_y = self.model_to_view(map_x, map_y)
-                    self.surface.blit(image, (view_x + x, view_y + y))
+                    self.surface.blit(image, (view_x + x, view_y + y -  image.get_height()))
 
                     if (map_x, map_y) == (self.active_x, self.active_y):
-                        self.surface.blit(highlight_image, (view_x + x, view_y + y))
+                        self.surface.blit(highlight_image, (view_x + x, view_y + y  - highlight_image.get_height()))
 
                     creation = self.game.get_creation(map_x,map_y)
                     if creation is not None:
                         image = View.image_manager.get_skin_image(creation.name,
-                                                                  width=GameView.TILE_IMAGE_WIDTH,
+                                                                  width=GameView.CREATION_IMAGE_WIDTH,
                                                                   tick=self.tick_count)
 
-                        image = pygame.transform.scale(image, (
-                            GameView.TILE_IMAGE_WIDTH, int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH)))
-
                         view_x, view_y = self.model_to_view(map_x, map_y, 1)
-                        self.surface.blit(image, (view_x, view_y + y))
+                        self.surface.blit(image, (view_x + int((GameView.TILE_IMAGE_WIDTH-GameView.CREATION_IMAGE_WIDTH)/2),
+                                          view_y + y - image.get_height()))
 
 
 class GameOverView(View):
