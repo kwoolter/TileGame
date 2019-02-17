@@ -185,4 +185,159 @@
             </resource>
         </outputs>
     </creatable>
+    <creatable id="Trees">
+        <name>Trees</name>
+        <description>A patch of trees</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Mango Tree">
+        <name>Mango Tree</name>
+        <description>A mango tree</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Market">
+        <name>Market</name>
+        <description>A Market</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Scrub1">
+        <name>Scrub1</name>
+        <description>Scrub1</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Plant1">
+        <name>Plant1</name>
+        <description>Plant1</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Strawberries">
+        <name>Strawberries</name>
+        <description>Strawberries</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
+    <creatable id="Carrots">
+        <name>Carrots</name>
+        <description>Strawberries</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+            <resource>
+                <name>Nails</name>
+                <count>10</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
 </creatables>
+

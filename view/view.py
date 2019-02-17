@@ -23,7 +23,7 @@ class ImageManager:
             self.load_skins()
             self.load_sprite_sheets()
 
-    def get_image(self, image_file_name: str, width: int = 32, height: int = 32):
+    def get_image(self, image_file_name: str, width: int = 0, height: int = 0):
 
         if image_file_name not in ImageManager.image_cache.keys():
 
@@ -41,6 +41,15 @@ class ImageManager:
                 original_image = image_sheet.image_at()
 
             try:
+                orig_width = original_image.get_width()
+                orig_height = original_image.get_height()
+
+                if height == 0 and width > 0:
+                    height = int(orig_height * width/orig_width)
+
+
+                if height > 0 and width == 0:
+                    width = int(orig_width * height/orig_height)
 
                 image = pygame.transform.scale(original_image, (width, height))
 
@@ -73,12 +82,20 @@ class ImageManager:
             model.WorldMap.STRUCTURE_CAVE: "Cave.png",
             model.WorldMap.STRUCTURE_TENT: "Tent.png",
             model.WorldMap.STRUCTURE_FORT: "Fort.png",
+            model.WorldMap.STRUCTURE_MARKET: "market.png",
+            model.WorldMap.MATERIAL_TREE: "tree.png",
+            model.WorldMap.MATERIAL_TREE2: "tree2.png",
+            model.WorldMap.MATERIAL_TREE3: "mango_tree.png",
+            model.WorldMap.MATERIAL_SCRUB1: "scrub1.png",
+            model.WorldMap.MATERIAL_PLANT1: "plant1.png",
+            model.WorldMap.FOOD_STRAWBERRIES: "strawberries.png",
+            model.WorldMap.FOOD_CARROTS: "carrots.png",
 
         })
 
         ImageManager.skins[new_skin_name] = new_skin
 
-    def get_skin_image(self, tile_name: str, skin_name: str = DEFAULT_SKIN, tick=0, width: int = 32, height: int = 32):
+    def get_skin_image(self, tile_name: str, skin_name: str = DEFAULT_SKIN, tick=0, width: int = 0, height: int = 0):
 
         if skin_name not in ImageManager.skins.keys():
             raise Exception("Can't find specified skin {0}".format(skin_name))
@@ -625,7 +642,6 @@ class GameView(View):
                     if creation is not None:
                         image = View.image_manager.get_skin_image(creation.name,
                                                                   width=GameView.TILE_IMAGE_WIDTH,
-                                                                  height=GameView.TILE_IMAGE_HEIGHT * 2,
                                                                   tick=self.tick_count)
 
                         image = pygame.transform.scale(image, (

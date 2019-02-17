@@ -1,6 +1,7 @@
 import os
 import pygame
 from pygame.locals import *
+import random
 
 import audio
 import model
@@ -119,14 +120,28 @@ class Controller:
                                 x,y = self.view.game_view.active_xy
                                 self.game.add_creation_by_name(model.WorldMap.STRUCTURE_BIG_HOUSE, x, y)
                             elif event.key == K_F3:
+                                items = (model.WorldMap.STRUCTURE_TENT,
+                                         model.WorldMap.STRUCTURE_CAVE,
+                                         model.WorldMap.STRUCTURE_FORT,
+                                         model.WorldMap.STRUCTURE_MARKET)
                                 x,y = self.view.game_view.active_xy
-                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_CAVE, x, y)
+                                self.game.add_creation_by_name(random.choice(items), x, y)
                             elif event.key == K_F4:
+                                items = (model.WorldMap.MATERIAL_TREE,
+                                         model.WorldMap.MATERIAL_TREE2,
+                                         model.WorldMap.MATERIAL_TREE3,
+                                         model.WorldMap.MATERIAL_PLANT1,
+                                         model.WorldMap.MATERIAL_SCRUB1)
                                 x,y = self.view.game_view.active_xy
-                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_TENT, x, y)
+                                self.game.add_creation_by_name(random.choice(items), x, y)
                             elif event.key == K_F5:
+                                items = (model.WorldMap.FOOD_STRAWBERRIES,
+                                         model.WorldMap.FOOD_CARROTS)
                                 x,y = self.view.game_view.active_xy
-                                self.game.add_creation_by_name(model.WorldMap.STRUCTURE_FORT, x, y)
+                                self.game.add_creation_by_name(random.choice(items), x, y)
+                            elif event.key == K_F6:
+                                x,y = self.view.game_view.active_xy
+                                self.game.add_creation_by_name(model.WorldMap.MATERIAL_TREE, x, y)
                             elif event.key == Controller.KEY_PAUSE:
                                 self.game.pause()
                             elif event.key == K_F12:

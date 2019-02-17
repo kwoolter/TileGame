@@ -327,7 +327,17 @@ class WorldMap:
     STRUCTURE_BIG_HOUSE = "Large Wooden House"
     STRUCTURE_CAVE = "Cave"
     STRUCTURE_TENT = "Tent"
+    STRUCTURE_MARKET = "Market"
     STRUCTURE_FORT = "Fort"
+
+    MATERIAL_TREE = "Trees"
+    MATERIAL_TREE2 = "Mango Tree"
+    MATERIAL_TREE3 = "Tree3"
+    MATERIAL_PLANT1 = "Plant1"
+    MATERIAL_SCRUB1 = "Scrub1"
+
+    FOOD_STRAWBERRIES = "Strawberries"
+    FOOD_CARROTS = "Carrots"
 
     topo_zones = {
 

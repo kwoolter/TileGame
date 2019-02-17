@@ -23,3 +23,10 @@ Tree,Tree,Material,T
 Cave,Cave,Structure,c
 Tent,Tent,Structure,^
 Fort,Fort,Structure,F
+Trees,Trees,Material,T
+Mango Tree,Mango Tree,Material,M
+Strawberries,Strawberries,Material,s
+Market,Market,Structure,a
+Carrots,Carrots,Food,r
+Scrub1,Scrub1,Material,u
+Plant1,Plant1,Material,p
