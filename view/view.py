@@ -75,8 +75,8 @@ class ImageManager:
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGrey.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhite.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrown.png",
-            model.WorldMap.TILE_SAND: "3dhexagonSand.png",
-            GameView.TILE_HIGHLIGHT: "3dhexagonRed.png",
+            model.WorldMap.TILE_SAND: "3dhexagonYellow.png",
+            GameView.TILE_HIGHLIGHT: "3dhexagonHighlight.png",
             model.WorldMap.STRUCTURE_SMALL_HOUSE:"SmallHouse2.png",
             model.WorldMap.STRUCTURE_BIG_HOUSE: "BigHouse.png",
             model.WorldMap.STRUCTURE_CAVE: "Cave.png",
@@ -477,7 +477,7 @@ class GameReadyView(View):
 
 
 class GameView(View):
-    FG_COLOUR = Colours.GOLD
+    FG_COLOUR = Colours.WHITE
     BG_COLOUR = Colours.DARK_GREY
 
     TILE_HIGHLIGHT = "Highlight"
@@ -582,23 +582,8 @@ class GameView(View):
 
         self.surface.fill(GameReadyView.BG_COLOUR)
 
-        pane_rect = self.surface.get_rect()
-
-        x = pane_rect.centerx
-        y = 20
-
-        msg = self.game.state
-
-        draw_text(self.surface,
-                  msg=msg,
-                  x=x,
-                  y=y,
-                  size=40,
-                  fg_colour=GameReadyView.FG_COLOUR,
-                  bg_colour=GameReadyView.BG_COLOUR)
-
         x = 0
-        y += 30 + GameView.TILE_IMAGE_WIDTH
+        y = 50 + GameView.TILE_IMAGE_WIDTH
 
         highlight_image = View.image_manager.get_skin_image(GameView.TILE_HIGHLIGHT,
                                                             width=GameView.TILE_IMAGE_WIDTH,
@@ -639,9 +624,34 @@ class GameView(View):
                                                                   width=GameView.CREATION_IMAGE_WIDTH,
                                                                   tick=self.tick_count)
 
+                        if creation.is_complete is False:
+                            image.set_alpha(150)
+                        else:
+                            image.set_alpha(255)
+
                         view_x, view_y = self.model_to_view(map_x, map_y, 1)
                         self.surface.blit(image, (view_x + int((GameView.TILE_IMAGE_WIDTH-GameView.CREATION_IMAGE_WIDTH)/2),
                                           view_y + y - image.get_height()))
+
+                        text = ""
+                        if creation.is_complete is False:
+                            text = "{0} ({1}%)".format(creation.name, creation.percent_complete)
+
+                        elif (map_x, map_y) == (self.active_x, self.active_y):
+                            text = "{0}".format(creation.description)
+
+                        if text != "":
+                            tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH/2)
+                            ty = view_y + y - image.get_height()
+
+                            draw_text(self.surface,
+                                      msg=text,
+                                      x=tx,
+                                      y=ty,
+                                      size=12,
+                                      fg_colour=GameView.FG_COLOUR,
+                                      bg_colour=GameView.BG_COLOUR,
+                                      centre=True)
 
 
 class GameOverView(View):

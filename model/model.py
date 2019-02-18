@@ -120,6 +120,7 @@ class Game:
                                     Game.TICK))
 
         for creation in self.creations.values():
+            creation.tick()
             if self.inventory.is_creatable(creation):
                 creation.tick()
 
