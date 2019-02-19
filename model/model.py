@@ -38,8 +38,8 @@ class Game:
     TICK = "Tick"
     QUIT = "Quit"
 
-    SAVE_GAME_DIR = os.path.dirname(__file__) + "\\saves\\"
-    GAME_DATA_DIR = os.path.dirname(__file__) + "\\data\\"
+    SAVE_GAME_DIR = os.path.join(os.path.dirname(__file__),"saves")
+    GAME_DATA_DIR = os.path.join(os.path.dirname(__file__),"data")
 
     def __init__(self, name: str):
 
@@ -74,13 +74,13 @@ class Game:
         self.state = Game.STATE_READY
 
         self.inventory = Inventory()
-        self.resources = ResourceFactory(Game.GAME_DATA_DIR + "resources.csv")
+        self.resources = ResourceFactory(os.path.join(Game.GAME_DATA_DIR,"resources.csv"))
         self.resources.load()
 
-        self.creatables = CreatableFactoryXML(Game.GAME_DATA_DIR + "creatables.xml")
+        self.creatables = CreatableFactoryXML(os.path.join(Game.GAME_DATA_DIR,"creatables.xml"))
         self.creatables.load()
 
-        self.map = WorldMap("Kingdom 2", 50, 50)
+        self.map = WorldMap("Kingdom 2", 100, 100)
         self.map.initialise()
 
         self.creations = {}

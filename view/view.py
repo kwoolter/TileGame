@@ -69,7 +69,7 @@ class ImageManager:
 
             model.WorldMap.TILE_GRASS: "3dhexagonLightGreen.png",
             model.WorldMap.TILE_SCRUB: "3dhexagonGreen.png",
-            model.WorldMap.TILE_TREE: "3dhexagonDarkGreen.png",
+            model.WorldMap.TILE_FOREST: "3dhexagonDarkGreen.png",
             model.WorldMap.TILE_SEA: "3dhexagonBlue.png",
             model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlue.png",
             model.WorldMap.TILE_SHORE: "3dhexagonLightBlue.png",

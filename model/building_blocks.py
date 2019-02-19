@@ -312,6 +312,17 @@ class CreatableFactoryXML(object):
 
 
 class WorldMap:
+
+    # Topo generation controls
+    MAX_ALTITUDE = 10.0  # Highest Altitude
+    MAX_SLOPE = MAX_ALTITUDE * 0.15  # Maximum slope
+    MIN_SLOPE = MAX_SLOPE * -1.0  # Minimum slope
+    MAX_SLOPE_DELTA = MAX_SLOPE * 2.0  # How much can the slope change
+    MIN_ALTITUDE_CLIP_FACTOR = -0.75  # How many STDEV from the mean do we create a floor
+    ALTITUDE_OFFSET = 0.0
+    MIN_ALTITUDE = 0.0  # Lowest Altitude
+
+    # Tiles used for the map hexagons
     TILE_GRASS = "Grass"
     TILE_SEA = "Sea"
     TILE_DEEP_SEA = "Deep Sea"
@@ -321,9 +332,27 @@ class WorldMap:
     TILE_EARTH = "Earth"
     TILE_SAND = "Sand"
     TILE_ROCK = "Rock"
-    TILE_TREE = "Tree"
+    TILE_FOREST = "Forest"
     TILE_SCRUB = "Scrub"
 
+    # Map of altitude to tile - numbers in stdevs away from the mean
+    topo_zones = {
+
+        TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 2.0,
+        TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.25,
+        TILE_SHORE: MIN_ALTITUDE_CLIP_FACTOR * 1.0,
+        TILE_SAND: -0.5,
+        TILE_GRASS: 0.4,
+        TILE_SCRUB: 0.9,
+        TILE_FOREST: 1.2,
+        TILE_EARTH: 1.5,
+        TILE_ROCK: 1.9,
+        TILE_ICE: 2.4,
+        TILE_SNOW: 2.5
+
+    }
+
+    # Creations
     STRUCTURE_SMALL_HOUSE = "Small Wooden House"
     STRUCTURE_BIG_HOUSE = "Large Wooden House"
     STRUCTURE_CAVE = "Cave"
@@ -339,22 +368,6 @@ class WorldMap:
 
     FOOD_STRAWBERRIES = "Strawberries"
     FOOD_CARROTS = "Carrots"
-
-    topo_zones = {
-
-        TILE_DEEP_SEA: -2.3,
-        TILE_SEA: -1.0,
-        TILE_SHORE: -0.75,
-        TILE_SAND: -0.5,
-        TILE_GRASS: 0.4,
-        TILE_SCRUB: 0.9,
-        TILE_TREE: 1.2,
-        TILE_EARTH: 1.5,
-        TILE_ROCK: 1.9,
-        TILE_ICE: 2.4,
-        TILE_SNOW: 2.5
-
-    }
 
     def __init__(self, name: str, width: int = 50, height: int = 50):
         self.name = name
@@ -386,95 +399,85 @@ class WorldMap:
                         if a < a_mean + (a_std * altitude):
                             break
                 self.set(x, y, tile)
-                if a <=0 :
+                if a <= 0:
                     self.set_altitude(0, x, y)
 
         # Perform 2nd pass to add the shoreline and deep sea
         print("Pass 2: Setting shoreline tiles...")
 
-        # Define which neighboring points we are going to look at
-        vectors = ((-1, 0), (0, -1), (1, 0), (-1, 1), (0, 1), (1, 1))
-
-        # Iterate through each point in the map
-        for y in range(0, self.height):
-            for x in range(0, self.width):
-
-                tile = self.get(x, y)
-
-                # If we are on a sea tile...
-                if tile == WorldMap.TILE_SEA:
-                    is_shore = False
-
-                    # Get the contents of the surrounding tiles
-                    for dx, dy in vectors:
-                        # If a neighboring tile contains send then set tile to shore and break
-                        if self.is_valid_xy(x + dx, y + dy) is True:
-                            nearby_tile = self.get(x + dx, y + dy)
-                            if nearby_tile == WorldMap.TILE_SAND:
-                                self.set(x, y, WorldMap.TILE_SHORE)
-                                is_shore = True
-                                break
-
-                    # Randomly create deep sea
-                    if is_shore is False and random.random() > 0.85:
-                        self.set(x, y, WorldMap.TILE_DEEP_SEA)
-
+        # # Define which neighboring points we are going to look at
+        # vectors = ((-1, 0), (0, -1), (1, 0), (-1, 1), (0, 1), (1, 1))
+        #
+        # # Iterate through each point in the map
+        # for y in range(0, self.height):
+        #     for x in range(0, self.width):
+        #
+        #         tile = self.get(x, y)
+        #
+        #         # If we are on a sea tile...
+        #         if tile == WorldMap.TILE_SEA:
+        #             is_shore = False
+        #
+        #             # Get the contents of the surrounding tiles
+        #             for dx, dy in vectors:
+        #                 # If a neighboring tile contains send then set tile to shore and break
+        #                 if self.is_valid_xy(x + dx, y + dy) is True:
+        #                     nearby_tile = self.get(x + dx, y + dy)
+        #                     if nearby_tile == WorldMap.TILE_SAND:
+        #                         self.set(x, y, WorldMap.TILE_SHORE)
+        #                         is_shore = True
+        #                         break
+        #
+        #             # Randomly create deep sea
+        #             if is_shore is False and random.random() > 0.85:
+        #                 self.set(x, y, WorldMap.TILE_DEEP_SEA)
 
     def generate_topology(self):
-
-        # Topo controls
-        MAX_ALTITUDE = 10.0  # Highest Altitude
-        MIN_ALTITUDE_CLIP_FACTOR = 0.75  # How many STDEV below the mean do we create a floor
-        ALTITUDE_OFFSET = 0.0
-        MIN_ALTITUDE = 0.0  # Lowest Altitude
-        MAX_SLOPE = MAX_ALTITUDE * 0.15  # Maximum slope
-        MIN_SLOPE = MAX_SLOPE * -1.0  # Minimum slope
-        MAX_SLOPE_DELTA = MAX_SLOPE * 2.0  # How much can the slope change
 
         # Clear the topo model
         topo_model_pass1 = [[None for y in range(0, self._height)] for x in range(0, self._width)]
         self.topo_model_pass2 = [[None for y in range(0, self._height)] for x in range(0, self._width)]
 
         # Create an initial topography using altitudes and random slope changes
-        print("Pass 1: altitudes and slopes...")
+        print("Pass 1: generate altitudes and slopes...")
 
         # Set the first square to be a random altitude with slopes in range
-        topo_model_pass1[0][0] = (random.uniform(MIN_ALTITUDE, MAX_ALTITUDE),
-                                  random.uniform(MIN_SLOPE, MAX_SLOPE),
-                                  random.uniform(MIN_SLOPE, MAX_SLOPE))
+        topo_model_pass1[0][0] = (random.uniform(WorldMap.MIN_ALTITUDE, WorldMap.MAX_ALTITUDE),
+                                  random.uniform(WorldMap.MIN_SLOPE, WorldMap.MAX_SLOPE),
+                                  random.uniform(WorldMap.MIN_SLOPE, WorldMap.MAX_SLOPE))
 
         for y in range(0, self._height):
             for x in range(0, self._width):
                 if y == 0:
-                    north_slope = random.uniform(MIN_SLOPE, MAX_SLOPE)
-                    north_altitude = random.uniform(MIN_ALTITUDE, MAX_ALTITUDE)
-                    # north_altitude = 0
+                    north_slope = random.uniform(WorldMap.MIN_SLOPE, WorldMap.MAX_SLOPE)
+                    north_altitude = random.uniform(WorldMap.MIN_ALTITUDE, WorldMap.MAX_ALTITUDE)
                 else:
                     north_altitude, tmp, north_slope = topo_model_pass1[x][y - 1]
 
                 if x == 0:
-                    west_slope = random.uniform(MIN_SLOPE, MAX_SLOPE)
-                    west_altitude = random.uniform(MIN_ALTITUDE, MAX_ALTITUDE)
-                    # west_altitude = 0
+                    west_slope = random.uniform(WorldMap.MIN_SLOPE, WorldMap.MAX_SLOPE)
+                    west_altitude = random.uniform(WorldMap.MIN_ALTITUDE, WorldMap.MAX_ALTITUDE)
                 else:
                     west_altitude, west_slope, tmp = topo_model_pass1[x - 1][y]
 
                 clip = lambda n, minn, maxn: max(min(maxn, n), minn)
 
                 altitude = ((north_altitude + north_slope) + (west_altitude + west_slope)) / 2
-                altitude = clip(altitude, MIN_ALTITUDE, MAX_ALTITUDE)
+                altitude = clip(altitude, WorldMap.MIN_ALTITUDE, WorldMap.MAX_ALTITUDE)
 
-                east_slope = west_slope + ((random.random() * MAX_SLOPE_DELTA) - MAX_SLOPE_DELTA / 2)
-                east_slope = clip(east_slope, MIN_SLOPE, MAX_SLOPE)
+                east_slope = west_slope + ((random.random() * WorldMap.MAX_SLOPE_DELTA) - WorldMap.MAX_SLOPE_DELTA / 2)
+                east_slope = clip(east_slope, WorldMap.MIN_SLOPE, WorldMap.MAX_SLOPE)
 
-                south_slope = north_slope + ((random.random() * MAX_SLOPE_DELTA) - MAX_SLOPE_DELTA / 2)
-                south_slope = clip(south_slope, MIN_SLOPE, MAX_SLOPE)
+                south_slope = north_slope + (
+                            (random.random() * WorldMap.MAX_SLOPE_DELTA) - WorldMap.MAX_SLOPE_DELTA / 2)
+                south_slope = clip(south_slope, WorldMap.MIN_SLOPE, WorldMap.MAX_SLOPE)
 
                 topo_model_pass1[x][y] = (altitude, east_slope, south_slope)
 
-        print("Pass 2: averaging out using neighbouring points...")
 
         # Perform second pass averaging based on adjacent altitudes to smooth out topography
+        print("Pass 2: averaging out using neighbouring points...")
+
         # Define which neighboring points we are going to look at
         vectors = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1))
 
@@ -500,16 +503,15 @@ class WorldMap:
                 # Record the average altitude in a new array
                 self.topo_model_pass2[x][y] = average_altitude
 
-        #Perform 3rd pass clipping to create floors in the topology
+        # Perform 3rd pass shifting altitude to create floors in the topology at level 0
         a = numpy.array(self.topo_model_pass2)
         avg = numpy.mean(a)
         std = numpy.std(a)
-        threshold = avg - (std * MIN_ALTITUDE_CLIP_FACTOR)
-        #a[a < threshold] = threshold
+        threshold = avg + (std * WorldMap.MIN_ALTITUDE_CLIP_FACTOR)
+        print("Pass 3: applying altitude floor of {0:.3}...".format(threshold))
         a[a != 0] -= threshold
         self.topo_model_pass2 = a.tolist()
 
-        print("Pass 3: applying altitude floor of {0:.3}...".format(threshold))
 
     @property
     def width(self):
@@ -557,7 +559,7 @@ class WorldMap:
             raise Exception("Trying to get altitude at ({0},{1}) which is outside of the world!".format(x, y))
         return self.topo_model_pass2[x][y]
 
-    def set_altitude(self, new_altitude : float, x: int, y: int):
+    def set_altitude(self, new_altitude: float, x: int, y: int):
         if self.is_valid_xy(x, y) is False:
             raise Exception("Trying to set altitude at ({0},{1}) which is outside of the world!".format(x, y))
         self.topo_model_pass2[x][y] = new_altitude

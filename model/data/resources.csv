@@ -21,7 +21,7 @@ Deep Sea,Deep Sea,Material,v
 Shallows,Shallows,Material,.
 Sand,Sand,Material,.
 Rock,Rock,Material,^
-Tree,Tree,Material,T
+Forest,Forest,Material,T
 Cave,Cave,Structure,c
 Tent,Tent,Structure,^
 Fort,Fort,Structure,F
