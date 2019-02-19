@@ -4,4 +4,6 @@
 
 ## Screenshots
 
-<img src="https://raw.githubusercontent.com/kwoolter/TileGame/kingdom2/view/screenshots/Capture1.PNG" alt="cards1">
+<img src="https://github.com/kwoolter/TileGame/blob/Kingdom2/view/screenshots/Capture1.PNG?raw=true" alt="cards1">
+<br>
+<img src="https://github.com/kwoolter/TileGame/blob/Kingdom2/view/screenshots/Capture2.PNG?raw=true" alt="cards2">
