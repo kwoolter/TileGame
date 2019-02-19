@@ -71,11 +71,13 @@ class ImageManager:
             model.WorldMap.TILE_SCRUB: "3dhexagonGreen.png",
             model.WorldMap.TILE_TREE: "3dhexagonDarkGreen.png",
             model.WorldMap.TILE_SEA: "3dhexagonBlue.png",
+            model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlue.png",
+            model.WorldMap.TILE_SHORE: "3dhexagonLightBlue.png",
             model.WorldMap.TILE_ICE: "3dhexagonGrey.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGrey.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhite.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrown.png",
-            model.WorldMap.TILE_SAND: "3dhexagonYellow.png",
+            model.WorldMap.TILE_SAND: "3dhexagonYellow2.png",
             GameView.TILE_HIGHLIGHT: "3dhexagonHighlight.png",
             model.WorldMap.STRUCTURE_SMALL_HOUSE:"SmallHouse2.png",
             model.WorldMap.STRUCTURE_BIG_HOUSE: "BigHouse.png",
@@ -600,7 +602,7 @@ class GameView(View):
 
                 for tile_x in range(0, self.view_tiles_width, 2):
 
-                    # Always draw the
+                    # Always draw the tile odd tile first
                     xx = self.view_origin_x % 2 + i
 
                     map_x = tile_x + self.view_origin_x + xx
@@ -617,6 +619,18 @@ class GameView(View):
 
                     if (map_x, map_y) == (self.active_x, self.active_y):
                         self.surface.blit(highlight_image, (view_x + x, view_y + y  - highlight_image.get_height()))
+                        tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH / 2)
+                        ty = view_y + y -  + int(GameView.TILE_IMAGE_HEIGHT * 3/4 * GameView.Y_SQUASH)
+                        text = "  " + tile + "  "
+
+                        draw_text(self.surface,
+                                  msg=text,
+                                  x=tx,
+                                  y=ty,
+                                  size=16,
+                                  fg_colour=GameView.FG_COLOUR,
+                                  bg_colour=GameView.BG_COLOUR,
+                                  centre=True)
 
                     creation = self.game.get_creation(map_x,map_y)
                     if creation is not None:
@@ -625,7 +639,7 @@ class GameView(View):
                                                                   tick=self.tick_count)
 
                         if creation.is_complete is False:
-                            image.set_alpha(150)
+                            image.set_alpha(150 + creation.percent_complete)
                         else:
                             image.set_alpha(255)
 
