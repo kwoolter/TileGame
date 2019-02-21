@@ -94,6 +94,10 @@ class Inventory():
 
     FAIL = "Inventory action fail"
 
+    CHANGE_CREDIT = 1
+    CHANGE_DEBIT = -1
+    CHANGE_NO_CHANGE = 0
+
     def __init__(self):
 
         self.resources = {}
@@ -111,10 +115,10 @@ class Inventory():
         self.resources[new_resource] += item_count
 
     # Assign inventory resources to a specified creatable
-    def assign_resources(self, new_creatable : Creatable, credit = False):
+    def assign_resources(self, new_creatable : Creatable, change : int = CHANGE_NO_CHANGE):
 
         # If you are trying to something a resource but don't have enough resources...
-        if credit == False and self.is_creatable(new_creatable) is False:
+        if change == Inventory.CHANGE_DEBIT and self.is_creatable(new_creatable) is False:
             print("Fail")
             EventQueue.add_event(Event(Inventory.FAIL,
                                        "Insufficient resources in inventory to create {0}!".format(new_creatable.name),
@@ -122,7 +126,7 @@ class Inventory():
         else:
             for resource_name, count in new_creatable.pre_requisites.items():
                 pre_req = ResourceFactory.get_resource(resource_name)
-                self.add_resource(pre_req, count * (-1 if credit is False else 1))
+                self.add_resource(pre_req, count * change)
                 print("Using {0} x {1} to create {2}".format(count,pre_req,new_creatable.name))
 
     # Have we got the required resources to creat a specified creatable?

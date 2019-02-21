@@ -195,10 +195,6 @@
                 <name>Wood</name>
                 <count>4</count>
             </resource>
-            <resource>
-                <name>Nails</name>
-                <count>10</count>
-            </resource>
         </pre_requisites>
         <outputs>
             <resource>
@@ -216,10 +212,6 @@
             <resource>
                 <name>Wood</name>
                 <count>4</count>
-            </resource>
-            <resource>
-                <name>Nails</name>
-                <count>10</count>
             </resource>
         </pre_requisites>
         <outputs>

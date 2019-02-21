@@ -84,20 +84,38 @@ class Game:
         self.map = WorldMap("Kingdom 2", 100, 100)
         self.map.initialise()
 
-        self.creations = {}
-
         resource_types = ResourceFactory.get_resource_types()
 
         for type in resource_types:
             new_resource = ResourceFactory.get_resource(type)
-            self.inventory.add_resource(new_resource, random.randint(20, 60))
+            self.inventory.add_resource(new_resource, random.randint(20, 160))
+
+        self.creations = {}
+        self.add_initial_creations()
+
 
     def start(self):
 
         self.state = Game.STATE_PLAYING
 
+    def add_initial_creations(self):
+
+        tile_to_creation = {
+            WorldMap.TILE_FOREST : (WorldMap.MATERIAL_TREE, WorldMap.MATERIAL_TREE2)
+        }
+
+        for y in range(0,self.map.height):
+            for x in range (0, self.map.width):
+                tile = self.map.get(x,y)
+                if tile in tile_to_creation.keys() and random.randint(0,10) > 9:
+                    new_creation = random.choice(tile_to_creation[tile])
+                    self.add_creation_by_name(new_creation, x, y, change = Inventory.CHANGE_NO_CHANGE)
+
+
     # Add a new creation to the world
-    def add_creation(self, new_creation: Creatable, x: int = 0, y: int = 0):
+    def add_creation(self, new_creation: Creatable, x: int = 0, y: int = 0, change : int = Inventory.CHANGE_DEBIT):
+
+        success = False
 
         # Check if a creation can be built on the current tile...
         tile = self.map.get(x,y)
@@ -115,7 +133,7 @@ class Game:
                                        Game.EVENT_ACTION_FAIL))
 
         # Check if the new creation can be built from current resources..
-        elif self.inventory.is_creatable(new_creation) is False:
+        elif change == Inventory.CHANGE_DEBIT and self.inventory.is_creatable(new_creation) is False:
             EventQueue.add_event(Event(Game.EVENT_ACTION_FAIL,
                                        "Insufficient resources in inventory to create {0}!".format(
                                            new_creation.name),
@@ -123,21 +141,22 @@ class Game:
 
         else:
             # If it can then assign the required resources and add the creation to the world
-            self.inventory.assign_resources(new_creation)
+            self.inventory.assign_resources(new_creation, change=change)
             self.creations[(x, y)] = new_creation
             print("Added creation {0} at ({1},{2})".format(new_creation.name, x, y))
+            success = True
 
-
+        return success
 
     def delete_creation(self, x: int = 0, y: int = 0):
         creation = self.get_creation(x, y)
         if creation is not None:
-            self.inventory.assign_resources(creation, credit=True)
+            self.inventory.assign_resources(creation, change = Inventory.CHANGE_CREDIT)
             del self.creations[(x, y)]
 
-    def add_creation_by_name(self, new_creation_name: str, x: int = 0, y: int = 0):
+    def add_creation_by_name(self, new_creation_name: str, x: int = 0, y: int = 0, change = Inventory.CHANGE_DEBIT):
         new_creation = self.creatables.get_creatable_copy(new_creation_name)
-        self.add_creation(new_creation, x, y)
+        return self.add_creation(new_creation, x, y, change)
 
     def get_creation(self, x: int, y: int):
         if (x, y) in self.creations.keys():
