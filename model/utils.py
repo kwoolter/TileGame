@@ -17,20 +17,24 @@ class Event():
 
 
 class EventQueue():
-    def __init__(self):
-        self.events = collections.deque()
 
-    def add_event(self, new_event: Event):
-        self.events.append(new_event)
+    events = collections.deque()
 
-    def pop_event(self):
-        return self.events.pop()
+    @staticmethod
+    def add_event(new_event: Event):
+        EventQueue.events.append(new_event)
 
-    def size(self):
-        return len(self.events)
+    @staticmethod
+    def pop_event():
+        return EventQueue.events.pop()
 
-    def print(self):
-        for event in self.events:
+    @staticmethod
+    def size():
+        return len(EventQueue.events)
+
+    @staticmethod
+    def print():
+        for event in EventQueue.events:
             print(event)
 
 def is_numeric(s):

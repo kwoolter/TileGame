@@ -106,6 +106,7 @@ class AudioManager:
             model.Game.STATE_PAUSED: "LTTP_Menu_Select.wav",
             model.Game.STATE_GAME_OVER: "LTTP_Link_Hurt.wav",
             model.Game.STATE_READY: "LA_TrendyGame_Win.wav",
+            model.Game.EVENT_ACTION_FAIL: "LTTP_Error.wav",
         }
 
         self.sound_themes[new_theme_name] = new_theme

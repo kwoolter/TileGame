@@ -14,21 +14,21 @@ Small Brick House,Small Brick House,Structure,b
 Earth,Earth,Material,.
 Snow,Snow,Material,*
 Ice,Ice,Material,%
-Grass,Grass,Material,!
-Scrub,Scrub,Material,$
-Sea,Sea,Material,~
-Deep Sea,Deep Sea,Material,v
-Shallows,Shallows,Material,.
+Grass,Grass,Structure,!
+Scrub,Scrub,Structure,$
+Sea,Sea,Water,~
+Deep Sea,Deep Sea,Water,v
+Shallows,Shallows,Water,.
 Sand,Sand,Material,.
 Rock,Rock,Material,^
 Forest,Forest,Material,T
 Cave,Cave,Structure,c
 Tent,Tent,Structure,^
 Fort,Fort,Structure,F
-Trees,Trees,Material,T
+Trees,Trees,Structure,T
 Mango Tree,Mango Tree,Material,M
 Strawberries,Strawberries,Material,s
 Market,Market,Structure,a
 Carrots,Carrots,Food,r
-Scrub1,Scrub1,Material,u
-Plant1,Plant1,Material,p
+Scrub1,Scrub1,Structure,u
+Plant1,Plant1,Structure,p

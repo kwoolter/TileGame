@@ -319,7 +319,7 @@
     </creatable>
     <creatable id="Carrots">
         <name>Carrots</name>
-        <description>Strawberries</description>
+        <description>Carrots</description>
         <graphic>w</graphic>
         <ticks_required>5</ticks_required>
         <pre_requisites>

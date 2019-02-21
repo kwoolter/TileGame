@@ -142,6 +142,9 @@ class Controller:
                             elif event.key == K_F6:
                                 x,y = self.view.game_view.active_xy
                                 self.game.add_creation_by_name(model.WorldMap.MATERIAL_TREE, x, y)
+                            elif event.key == K_F12:
+                                x,y = self.view.game_view.active_xy
+                                self.game.delete_creation(x, y)
                             elif event.key == Controller.KEY_PAUSE:
                                 self.game.pause()
                             elif event.key == K_F12:

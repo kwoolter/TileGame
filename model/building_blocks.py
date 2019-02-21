@@ -3,6 +3,8 @@ import csv
 import logging
 import random
 from xml.dom.minidom import *
+from .utils import EventQueue
+from .utils import Event
 
 import numpy
 
@@ -90,6 +92,8 @@ class Creatable():
 
 class Inventory():
 
+    FAIL = "Inventory action fail"
+
     def __init__(self):
 
         self.resources = {}
@@ -98,6 +102,7 @@ class Inventory():
     def resource_type_count(self):
         return len(self.resources.keys())
 
+    # Add a specified quantity of a resource to teh inventory
     def add_resource(self, new_resource: Resource, item_count: int = 1):
 
         if new_resource not in self.resources.keys():
@@ -105,6 +110,22 @@ class Inventory():
 
         self.resources[new_resource] += item_count
 
+    # Assign inventory resources to a specified creatable
+    def assign_resources(self, new_creatable : Creatable, credit = False):
+
+        # If you are trying to something a resource but don't have enough resources...
+        if credit == False and self.is_creatable(new_creatable) is False:
+            print("Fail")
+            EventQueue.add_event(Event(Inventory.FAIL,
+                                       "Insufficient resources in inventory to create {0}!".format(new_creatable.name),
+                                       Inventory.FAIL))
+        else:
+            for resource_name, count in new_creatable.pre_requisites.items():
+                pre_req = ResourceFactory.get_resource(resource_name)
+                self.add_resource(pre_req, count * (-1 if credit is False else 1))
+                print("Using {0} x {1} to create {2}".format(count,pre_req,new_creatable.name))
+
+    # Have we got the required resources to creat a specified creatable?
     def is_creatable(self, new_creatable: Creatable):
 
         is_creatable = True
@@ -316,7 +337,7 @@ class WorldMap:
     # Topo generation controls
     MAX_ALTITUDE = 10.0  # Highest Altitude
     MAX_SLOPE = MAX_ALTITUDE * 0.15  # Maximum slope
-    MIN_SLOPE = MAX_SLOPE * -1.0  # Minimum slope
+    MIN_SLOPE = MAX_SLOPE * -1.0  # Minimum slope is the negative of maximum slope
     MAX_SLOPE_DELTA = MAX_SLOPE * 2.0  # How much can the slope change
     MIN_ALTITUDE_CLIP_FACTOR = -0.75  # How many STDEV from the mean do we create a floor
     ALTITUDE_OFFSET = 0.0
@@ -335,7 +356,7 @@ class WorldMap:
     TILE_FOREST = "Forest"
     TILE_SCRUB = "Scrub"
 
-    # Map of altitude to tile - numbers in stdevs away from the mean
+    # Map of altitude to tile zone - numbers in stdevs away from the mean
     topo_zones = {
 
         TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 2.0,
@@ -347,8 +368,8 @@ class WorldMap:
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.9,
-        TILE_ICE: 2.4,
-        TILE_SNOW: 2.5
+        TILE_ICE: 2.3,
+        TILE_SNOW: 2.4
 
     }
 
@@ -378,61 +399,43 @@ class WorldMap:
 
     def initialise(self):
 
-        # Generate a topology model for the map
+        # Generate a random topology model for the map
         self.generate_topology()
 
         # Clear the map squares
         self.map = [[WorldMap.TILE_EARTH for y in range(0, self._height)] for x in range(0, self._width)]
 
-        # Pass 1: Set tile based on height range
+        # Pass 1: Set tile contents based on height range
         print("Pass 1: Setting tile based on altitude...")
+
+        # Get the mean and stdev of the all altitudes
         a_mean = self.altitude_mean
         a_std = self.altitude_std
+
+        # loop through all points on the map
         for y in range(0, self.height):
             for x in range(0, self._width):
 
+                # Get the altitude at the selected point on the map
                 a = self.get_altitude(x, y)
+
+                # If altitude is zero we are at sea level
                 if a == 0:
                     tile = WorldMap.TILE_SEA
+                # Else use topo zones to place a point in a zone based on its altitude
                 else:
                     for tile, altitude in WorldMap.topo_zones.items():
                         if a < a_mean + (a_std * altitude):
                             break
                 self.set(x, y, tile)
+
+                # For all altitudes less than zero (underwater) set to zero to create flat sea surface
                 if a <= 0:
                     self.set_altitude(0, x, y)
 
-        # Perform 2nd pass to add the shoreline and deep sea
-        print("Pass 2: Setting shoreline tiles...")
-
-        # # Define which neighboring points we are going to look at
-        # vectors = ((-1, 0), (0, -1), (1, 0), (-1, 1), (0, 1), (1, 1))
-        #
-        # # Iterate through each point in the map
-        # for y in range(0, self.height):
-        #     for x in range(0, self.width):
-        #
-        #         tile = self.get(x, y)
-        #
-        #         # If we are on a sea tile...
-        #         if tile == WorldMap.TILE_SEA:
-        #             is_shore = False
-        #
-        #             # Get the contents of the surrounding tiles
-        #             for dx, dy in vectors:
-        #                 # If a neighboring tile contains send then set tile to shore and break
-        #                 if self.is_valid_xy(x + dx, y + dy) is True:
-        #                     nearby_tile = self.get(x + dx, y + dy)
-        #                     if nearby_tile == WorldMap.TILE_SAND:
-        #                         self.set(x, y, WorldMap.TILE_SHORE)
-        #                         is_shore = True
-        #                         break
-        #
-        #             # Randomly create deep sea
-        #             if is_shore is False and random.random() > 0.85:
-        #                 self.set(x, y, WorldMap.TILE_DEEP_SEA)
 
     def generate_topology(self):
+        """Build a random map of altitudes using a multi-pass algorithm"""
 
         # Clear the topo model
         topo_model_pass1 = [[None for y in range(0, self._height)] for x in range(0, self._width)]
@@ -491,7 +494,7 @@ class WorldMap:
 
                 # Get the heights of the surrounding points
                 for dx, dy in vectors:
-                    if x + dx < 0 or x + dx >= self._width or y + dy < 0 or y + dy >= self._height:
+                    if self.is_valid_xy(x + dx, y + dy) is False:
                         pass
                     else:
                         local_altitude, es, ss = topo_model_pass1[x + dx][y + dy]
@@ -526,7 +529,7 @@ class WorldMap:
 
         result = False
 
-        if x >= 0 and x < self.width and y >= 0 and y < self.height:
+        if x >= 0 and x < self._width and y >= 0 and y < self._height:
             result = True
 
         return result

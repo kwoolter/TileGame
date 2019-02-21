@@ -5,6 +5,7 @@ import model
 from .graphics import *
 
 
+
 class ImageManager:
     DEFAULT_SKIN = "default"
     RESOURCES_DIR = os.path.dirname(__file__) + "\\resources\\"
@@ -137,7 +138,7 @@ class ImageManager:
             self.sprite_sheets["fire{0}.png".format(i)] = (sheet_file_name, (i * 32, 0, 32, 32))
 
 
-class View():
+class BaseView():
     image_manager = ImageManager()
 
     def __init__(self, width: int = 0, height: int = 0):
@@ -146,7 +147,7 @@ class View():
         self.width = width
         self.surface = None
 
-        View.image_manager.initialise()
+        BaseView.image_manager.initialise()
 
     def initialise(self):
         pass
@@ -155,13 +156,13 @@ class View():
         self.tick_count += 1
 
     def process_event(self, new_event: model.Event):
-        print("Default View Class event process:{0}".format(new_event))
+        print("Default BaseView Class event process:{0}".format(new_event))
 
     def draw(self):
         pass
 
 
-class MainFrame(View):
+class MainFrame(BaseView):
     RESOURCES_DIR = os.path.dirname(__file__) + "\\resources\\"
 
     TITLE_HEIGHT = 80
@@ -181,6 +182,7 @@ class MainFrame(View):
         self.game_view = GameView(width, play_area_height)
         self.game_ready = GameReadyView(width, play_area_height)
         self.game_over = GameOverView(width, play_area_height)
+        self.game_inventory = InventoryView(100,300)
 
     def initialise(self):
 
@@ -207,6 +209,8 @@ class MainFrame(View):
         self.game_view.initialise(self.game)
         self.game_over.initialise(self.game)
 
+        self.game_inventory.initialise(self.game)
+
     def draw(self):
 
         self.surface.fill(Colours.DARK_GREY)
@@ -229,6 +233,8 @@ class MainFrame(View):
         elif self.game.state in (model.Game.STATE_PLAYING, model.Game.STATE_PAUSED):
             self.game_view.draw()
             self.surface.blit(self.game_view.surface, (x, y))
+            self.game_inventory.draw()
+            self.surface.blit(self.game_inventory.surface, (0,y))
         elif self.game.state == model.Game.STATE_BATTLE:
             self.battle_view.draw()
             self.surface.blit(self.battle_view.surface, (x, y))
@@ -276,7 +282,7 @@ class MainFrame(View):
         pygame.quit()
 
 
-class TitleBar(View):
+class TitleBar(BaseView):
     FILL_COLOUR = Colours.BLACK
     TEXT_FG_COLOUR = Colours.WHITE
     TEXT_BG_COLOUR = None
@@ -311,7 +317,7 @@ class TitleBar(View):
         self.surface.fill(TitleBar.FILL_COLOUR)
 
         if self.game is None:
-            print("TitleBar.draw() - No game to View")
+            print("TitleBar.draw() - No game to BaseView")
             return
 
         if self.title_image is not None:
@@ -334,7 +340,7 @@ class TitleBar(View):
                   size=int(pane_rect.height * 0.75))
 
 
-class StatusBar(View):
+class StatusBar(BaseView):
     FG_COLOUR = Colours.WHITE
     BG_COLOUR = Colours.BLACK
     ICON_WIDTH = 40
@@ -443,7 +449,7 @@ class StatusBar(View):
                       centre=False)
 
 
-class GameReadyView(View):
+class GameReadyView(BaseView):
     FG_COLOUR = Colours.GOLD
     BG_COLOUR = Colours.DARK_GREY
 
@@ -478,12 +484,12 @@ class GameReadyView(View):
                   bg_colour=GameReadyView.BG_COLOUR)
 
 
-class GameView(View):
+class GameView(BaseView):
+
     FG_COLOUR = Colours.WHITE
     BG_COLOUR = Colours.DARK_GREY
 
     TILE_HIGHLIGHT = "Highlight"
-    TILE_HOUSE = "House"
 
     Y_SQUASH = 0.75
     TILE_ROTATE_ANGLE = 30
@@ -508,7 +514,7 @@ class GameView(View):
         self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2)
 
         self.view_tiles_width = 16
-        self.view_tiles_height = 14
+        self.view_tiles_height = 15
 
         self.set_view_origin(0, 0)
         self.set_active()
@@ -541,7 +547,7 @@ class GameView(View):
             self.view_origin_x += x
             self.view_origin_y += y
 
-        print("View origin set to ({0},{1})".format(self.view_origin_x, self.view_origin_y))
+        print("BaseView origin set to ({0},{1})".format(self.view_origin_x, self.view_origin_y))
 
     def set_active(self, x: int = 0, y: int = 0, relative: bool = False):
 
@@ -585,40 +591,54 @@ class GameView(View):
         self.surface.fill(GameReadyView.BG_COLOUR)
 
         x = 0
-        y = 50 + GameView.TILE_IMAGE_WIDTH
+        y = GameView.TILE_IMAGE_WIDTH
 
-        highlight_image = View.image_manager.get_skin_image(GameView.TILE_HIGHLIGHT,
-                                                            width=GameView.TILE_IMAGE_WIDTH,
-                                                            height=int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH),
-                                                            tick=self.tick_count)
+        # Load in the image to highlight the current active tile
+        highlight_image = BaseView.image_manager.get_skin_image(GameView.TILE_HIGHLIGHT,
+                                                                width=GameView.TILE_IMAGE_WIDTH,
+                                                                height=int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH),
+                                                                tick=self.tick_count)
 
         highlight_image.set_alpha(150)
 
+        # Loop through the number of row that the view is oging to display
         for tile_y in range(0, self.view_tiles_height):
 
+            # Add the y origin to where we are going to start drawing the model tiles from
             map_y = tile_y + self.view_origin_y
 
+            # Print the two offset x rows
             for i in range(2):
 
+                # print a row of alternate x tiles
                 for tile_x in range(0, self.view_tiles_width, 2):
 
                     # Always draw the tile odd tile first
                     xx = self.view_origin_x % 2 + i
 
+                    # add the x origin to where we are going to start drawing the model from
                     map_x = tile_x + self.view_origin_x + xx
 
+                    # Get the specified tile from the model
                     tile = self.game.map.get(map_x, map_y)
 
-                    image = View.image_manager.get_skin_image(tile,
-                                                              width=GameView.TILE_IMAGE_WIDTH,
-                                                              height=int(GameView.TILE_IMAGE_HEIGHT* GameView.Y_SQUASH),
-                                                              tick=self.tick_count)
+                    # Get the image associated with that tile name
+                    image = BaseView.image_manager.get_skin_image(tile,
+                                                                  width=GameView.TILE_IMAGE_WIDTH,
+                                                                  height=int(GameView.TILE_IMAGE_HEIGHT* GameView.Y_SQUASH),
+                                                                  tick=self.tick_count)
 
+                    # Convert the model coords to view coords and blit the tile image at that location
                     view_x, view_y = self.model_to_view(map_x, map_y)
                     self.surface.blit(image, (view_x + x, view_y + y -  image.get_height()))
 
+                    # If the specified tile is the currently selected active tile...
                     if (map_x, map_y) == (self.active_x, self.active_y):
+
+                        # Draw the tile highlight image over it
                         self.surface.blit(highlight_image, (view_x + x, view_y + y  - highlight_image.get_height()))
+
+                        # Draw text in the middle of the tile surface with teh tile name
                         tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH / 2)
                         ty = view_y + y -  + int(GameView.TILE_IMAGE_HEIGHT * 3/4 * GameView.Y_SQUASH)
                         text = "  " + tile + "  "
@@ -632,20 +652,26 @@ class GameView(View):
                                   bg_colour=GameView.BG_COLOUR,
                                   centre=True)
 
+                    # See if a creation has been placed at this location...
                     creation = self.game.get_creation(map_x,map_y)
                     if creation is not None:
-                        image = View.image_manager.get_skin_image(creation.name,
-                                                                  width=GameView.CREATION_IMAGE_WIDTH,
-                                                                  tick=self.tick_count)
 
+                        # Get the image for teh creation based on its name
+                        image = BaseView.image_manager.get_skin_image(creation.name,
+                                                                      width=GameView.CREATION_IMAGE_WIDTH,
+                                                                      tick=self.tick_count)
+
+                        # If it is not yet complete then change the image transaprecny based on % complete
                         if creation.is_complete is False:
                             image.set_alpha(150 + creation.percent_complete)
                         else:
                             image.set_alpha(255)
 
+                        # Convert the model coords to view coords and blit the tile image at that location
                         view_x, view_y = self.model_to_view(map_x, map_y, 1)
                         self.surface.blit(image, (view_x + int((GameView.TILE_IMAGE_WIDTH-GameView.CREATION_IMAGE_WIDTH)/2),
                                           view_y + y - image.get_height()))
+
 
                         text = ""
                         if creation.is_complete is False:
@@ -668,7 +694,8 @@ class GameView(View):
                                       centre=True)
 
 
-class GameOverView(View):
+class GameOverView(BaseView):
+
     FG_COLOUR = Colours.WHITE
     BG_COLOUR = Colours.DARK_GREY
     SCORE_TEXT_SIZE = 22
@@ -705,8 +732,75 @@ class GameOverView(View):
                   bg_colour=GameOverView.BG_COLOUR)
 
 
+
+
+class InventoryView(BaseView):
+
+    FILL_COLOUR = Colours.GREEN
+    FG_COLOUR = Colours.WHITE
+    BG_COLOUR = Colours.BLACK
+    ITEM_TEXT_FONT_SIZE = 16
+
+
+    def __init__(self, width: int = 100, height: int = 200):
+        super(InventoryView, self).__init__(width, height)
+
+        self.game = None
+
+        self.surface = pygame.Surface((width, height))
+
+    def initialise(self, game: model.Game ):
+        self.game = game
+
+    def draw(self):
+
+        super(InventoryView, self).draw()
+
+        self.surface.fill(InventoryView.FILL_COLOUR)
+
+        msg = "Inventory"
+        pane_rect = self.surface.get_rect()
+        x=pane_rect.centerx
+        y = 20
+
+        draw_text(self.surface,
+                  msg=msg,
+                  x=x,
+                  y=y,
+                  fg_colour=InventoryView.FG_COLOUR,
+                  bg_colour=InventoryView.BG_COLOUR,
+                  size=24)
+
+        if self.game is None:
+            print("InventoryView.draw() - No game to BaseView")
+            return
+
+        inv = self.game.inventory
+
+        for i in inv.resources.keys():
+
+            if i.category == "Material":
+
+                item_count = inv.resources[i]
+                y+=16
+                msg = "{0} : {1}".format(i.name, item_count)
+                draw_text(self.surface,
+                          msg=msg,
+                          x=x,
+                          y=y,
+                          fg_colour=InventoryView.FG_COLOUR,
+                          bg_colour=InventoryView.BG_COLOUR,
+                          size=16)
+
+
+
+
+
+
+
+
 def draw_icon(surface, x, y, icon_name, count: int = None, tick: int = 0, width=32, height=32):
-    image = View.image_manager.get_skin_image(tile_name=icon_name, skin_name="default", tick=tick)
+    image = BaseView.image_manager.get_skin_image(tile_name=icon_name, skin_name="default", tick=tick)
     image = pygame.transform.scale(image, (width, height))
     iconpos = image.get_rect()
     iconpos.left = x
@@ -720,3 +814,5 @@ def draw_icon(surface, x, y, icon_name, count: int = None, tick: int = 0, width=
         count_pos.bottom = iconpos.bottom
         count_pos.right = iconpos.right
         surface.blit(icon_count, count_pos)
+
+

@@ -1,14 +1,15 @@
-import collections
 import logging
 import os
+import random
+
+from .building_blocks import Creatable
+from .building_blocks import CreatableFactoryXML
+from .building_blocks import Inventory
+from .building_blocks import ResourceFactory
+from .building_blocks import WorldMap
 from .utils import Event
 from .utils import EventQueue
-from .building_blocks import Resource
-from .building_blocks import Inventory
-from .building_blocks import Creatable
-from .building_blocks import ResourceFactory
-from .building_blocks import CreatableFactoryXML
-from .building_blocks import WorldMap
+
 
 class Objects:
     EMPTY = "empty"
@@ -27,7 +28,6 @@ class Objects:
 
 
 class Game:
-
     STATE_LOADED = "LOADED"
     STATE_READY = "READY"
     STATE_PLAYING = "PLAYING"
@@ -38,8 +38,10 @@ class Game:
     TICK = "Tick"
     QUIT = "Quit"
 
-    SAVE_GAME_DIR = os.path.join(os.path.dirname(__file__),"saves")
-    GAME_DATA_DIR = os.path.join(os.path.dirname(__file__),"data")
+    EVENT_ACTION_FAIL = "Action failed"
+
+    SAVE_GAME_DIR = os.path.join(os.path.dirname(__file__), "saves")
+    GAME_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
     def __init__(self, name: str):
 
@@ -53,8 +55,7 @@ class Game:
         self.creations = None
         self.map = None
 
-        self.events = EventQueue()
-        self.events.add_event(Event("{0} model created!".format(self.name)))
+        EventQueue.add_event(Event("{0} model created!".format(self.name)))
 
     @property
     def state(self):
@@ -65,19 +66,19 @@ class Game:
         self._old_state = self.state
         self._state = new_state
 
-        self.events.add_event(Event(self._state,
-                                    "Game state change from {0} to {1}".format(self._old_state, self._state),
-                                    Event.STATE))
+        EventQueue.add_event(Event(self._state,
+                                   "Game state change from {0} to {1}".format(self._old_state, self._state),
+                                   Event.STATE))
 
     def initialise(self):
 
         self.state = Game.STATE_READY
 
         self.inventory = Inventory()
-        self.resources = ResourceFactory(os.path.join(Game.GAME_DATA_DIR,"resources.csv"))
+        self.resources = ResourceFactory(os.path.join(Game.GAME_DATA_DIR, "resources.csv"))
         self.resources.load()
 
-        self.creatables = CreatableFactoryXML(os.path.join(Game.GAME_DATA_DIR,"creatables.xml"))
+        self.creatables = CreatableFactoryXML(os.path.join(Game.GAME_DATA_DIR, "creatables.xml"))
         self.creatables.load()
 
         self.map = WorldMap("Kingdom 2", 100, 100)
@@ -85,23 +86,62 @@ class Game:
 
         self.creations = {}
 
+        resource_types = ResourceFactory.get_resource_types()
+
+        for type in resource_types:
+            new_resource = ResourceFactory.get_resource(type)
+            self.inventory.add_resource(new_resource, random.randint(20, 60))
+
     def start(self):
 
         self.state = Game.STATE_PLAYING
 
+    # Add a new creation to the world
+    def add_creation(self, new_creation: Creatable, x: int = 0, y: int = 0):
 
-    def add_creation(self, new_creation : Creatable, x : int = 0, y : int= 0):
-        self.creations[(x,y)] = new_creation
+        # Check if a creation can be built on the current tile...
+        tile = self.map.get(x,y)
+        if self.map.get(x,y) in (WorldMap.TILE_SHORE, WorldMap.TILE_SEA,WorldMap.TILE_DEEP_SEA):
 
-    def add_creation_by_name(self, new_creation_name : str, x : int = 0, y : int= 0):
+            EventQueue.add_event(Event(Game.EVENT_ACTION_FAIL,
+                                       "Can't build creations on {0}!".format(tile),
+                                       Game.EVENT_ACTION_FAIL))
+
+        # Check if the current tile is not already occupied...
+        elif (x, y) in self.creations.keys():
+            creation = self.get_creation(x, y)
+            EventQueue.add_event(Event(Game.EVENT_ACTION_FAIL,
+                                       "Already a creation {2} at ({0},{1})!".format(x, y, creation.name),
+                                       Game.EVENT_ACTION_FAIL))
+
+        # Check if the new creation can be built from current resources..
+        elif self.inventory.is_creatable(new_creation) is False:
+            EventQueue.add_event(Event(Game.EVENT_ACTION_FAIL,
+                                       "Insufficient resources in inventory to create {0}!".format(
+                                           new_creation.name),
+                                       Game.EVENT_ACTION_FAIL))
+
+        else:
+            # If it can then assign the required resources and add the creation to the world
+            self.inventory.assign_resources(new_creation)
+            self.creations[(x, y)] = new_creation
+            print("Added creation {0} at ({1},{2})".format(new_creation.name, x, y))
+
+
+
+    def delete_creation(self, x: int = 0, y: int = 0):
+        creation = self.get_creation(x, y)
+        if creation is not None:
+            self.inventory.assign_resources(creation, credit=True)
+            del self.creations[(x, y)]
+
+    def add_creation_by_name(self, new_creation_name: str, x: int = 0, y: int = 0):
         new_creation = self.creatables.get_creatable_copy(new_creation_name)
-        self.creations[(x,y)] = new_creation
+        self.add_creation(new_creation, x, y)
 
-        print("Added creation {0} at ({1},{2})".format(new_creation_name, x, y))
-
-    def get_creation(self, x : int, y : int):
-        if (x,y) in self.creations.keys():
-            return self.creations[(x,y)]
+    def get_creation(self, x: int, y: int):
+        if (x, y) in self.creations.keys():
+            return self.creations[(x, y)]
         else:
             return None
 
@@ -115,9 +155,9 @@ class Game:
 
         self.tick_count += 1
 
-        self.events.add_event(Event(Game.TICK,
-                                    "Game ticked to {0}".format(self.tick_count),
-                                    Game.TICK))
+        EventQueue.add_event(Event(Game.TICK,
+                                   "Game ticked to {0}".format(self.tick_count),
+                                   Game.TICK))
 
         for creation in self.creations.values():
             creation.tick()
@@ -127,8 +167,8 @@ class Game:
     def get_next_event(self):
 
         next_event = None
-        if self.events.size() > 0:
-            next_event = self.events.pop_event()
+        if EventQueue.size() > 0:
+            next_event = EventQueue.pop_event()
 
         return next_event
 
@@ -162,4 +202,3 @@ class Game:
 
     def load(self):
         pass
-
