@@ -331,5 +331,15 @@
             </resource>
         </outputs>
     </creatable>
+    <creatable id="Border">
+        <name>Border</name>
+        <description>Border</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+        </pre_requisites>
+        <outputs>
+        </outputs>
+    </creatable>
 </creatables>
 

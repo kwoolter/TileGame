@@ -93,7 +93,6 @@ class Game:
         self.creations = {}
         self.add_initial_creations()
 
-
     def start(self):
 
         self.state = Game.STATE_PLAYING
@@ -101,25 +100,33 @@ class Game:
     def add_initial_creations(self):
 
         tile_to_creation = {
-            WorldMap.TILE_FOREST : (WorldMap.MATERIAL_TREE, WorldMap.MATERIAL_TREE2)
+            WorldMap.TILE_FOREST: (WorldMap.MATERIAL_TREE, WorldMap.MATERIAL_TREE2),
+            WorldMap.TILE_SCRUB: WorldMap.MATERIAL_SCRUB1,
+            WorldMap.TILE_BORDER: WorldMap.TILE_BORDER
         }
 
-        for y in range(0,self.map.height):
-            for x in range (0, self.map.width):
-                tile = self.map.get(x,y)
-                if tile in tile_to_creation.keys() and random.randint(0,10) > 9:
-                    new_creation = random.choice(tile_to_creation[tile])
-                    self.add_creation_by_name(new_creation, x, y, change = Inventory.CHANGE_NO_CHANGE)
-
+        for y in range(0, self.map.height):
+            for x in range(0, self.map.width):
+                tile = self.map.get(x, y)
+                if tile == WorldMap.TILE_BORDER:
+                    pass
+                    #self.add_creation_by_name(tile, x, y, change=Inventory.CHANGE_NO_CHANGE)
+                elif tile in tile_to_creation.keys() and random.randint(0, 10) > 9:
+                    tiles = tile_to_creation[tile]
+                    if isinstance(tiles, tuple) is True:
+                        new_creation = random.choice(tiles)
+                    else:
+                        new_creation = tiles
+                    self.add_creation_by_name(new_creation, x, y, change=Inventory.CHANGE_NO_CHANGE)
 
     # Add a new creation to the world
-    def add_creation(self, new_creation: Creatable, x: int = 0, y: int = 0, change : int = Inventory.CHANGE_DEBIT):
+    def add_creation(self, new_creation: Creatable, x: int = 0, y: int = 0, change: int = Inventory.CHANGE_DEBIT):
 
         success = False
 
         # Check if a creation can be built on the current tile...
-        tile = self.map.get(x,y)
-        if self.map.get(x,y) in (WorldMap.TILE_SHORE, WorldMap.TILE_SEA,WorldMap.TILE_DEEP_SEA):
+        tile = self.map.get(x, y)
+        if self.map.get(x, y) in (WorldMap.TILE_SHORE, WorldMap.TILE_SEA, WorldMap.TILE_DEEP_SEA):
 
             EventQueue.add_event(Event(Game.EVENT_ACTION_FAIL,
                                        "Can't build creations on {0}!".format(tile),
@@ -151,10 +158,10 @@ class Game:
     def delete_creation(self, x: int = 0, y: int = 0):
         creation = self.get_creation(x, y)
         if creation is not None:
-            self.inventory.assign_resources(creation, change = Inventory.CHANGE_CREDIT)
+            self.inventory.assign_resources(creation, change=Inventory.CHANGE_CREDIT)
             del self.creations[(x, y)]
 
-    def add_creation_by_name(self, new_creation_name: str, x: int = 0, y: int = 0, change = Inventory.CHANGE_DEBIT):
+    def add_creation_by_name(self, new_creation_name: str, x: int = 0, y: int = 0, change=Inventory.CHANGE_DEBIT):
         new_creation = self.creatables.get_creatable_copy(new_creation_name)
         return self.add_creation(new_creation, x, y, change)
 

@@ -147,7 +147,7 @@ class Controller:
                                 self.game.delete_creation(x, y)
                             elif event.key == Controller.KEY_PAUSE:
                                 self.game.pause()
-                            elif event.key == K_F12:
+                            elif event.key == K_F11:
                                 self.game.new_map()
                             elif event.key == Controller.KEY_GAME_OVER:
                                 self.game.game_over()

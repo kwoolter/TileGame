@@ -359,6 +359,7 @@ class WorldMap:
     TILE_ROCK = "Rock"
     TILE_FOREST = "Forest"
     TILE_SCRUB = "Scrub"
+    TILE_BORDER = "Border"
 
     # Map of altitude to tile zone - numbers in stdevs away from the mean
     topo_zones = {
@@ -423,18 +424,24 @@ class WorldMap:
                 # Get the altitude at the selected point on the map
                 a = self.get_altitude(x, y)
 
+                if x == 0 or x == (self.width - 1) or y == 0 or y == (self.height - 1):
+                    tile = WorldMap.TILE_BORDER
+                    self.set_altitude(self.altitude_max, x, y)
+
                 # If altitude is zero we are at sea level
-                if a == 0:
+                elif a == 0:
                     tile = WorldMap.TILE_SEA
+
                 # Else use topo zones to place a point in a zone based on its altitude
                 else:
                     for tile, altitude in WorldMap.topo_zones.items():
                         if a < a_mean + (a_std * altitude):
                             break
+
                 self.set(x, y, tile)
 
                 # For all altitudes less than zero (underwater) set to zero to create flat sea surface
-                if a <= 0:
+                if self.get_altitude(x, y) <= 0:
                     self.set_altitude(0, x, y)
 
 
@@ -561,11 +568,13 @@ class WorldMap:
 
         self.map[x][y] = c
 
+    # Get the altitude at the specified co-ordinates
     def get_altitude(self, x: int, y: int):
         if self.is_valid_xy(x, y) is False:
             raise Exception("Trying to get altitude at ({0},{1}) which is outside of the world!".format(x, y))
         return self.topo_model_pass2[x][y]
 
+    # Set the altitude at the specified co-ordinates
     def set_altitude(self, new_altitude: float, x: int, y: int):
         if self.is_valid_xy(x, y) is False:
             raise Exception("Trying to set altitude at ({0},{1}) which is outside of the world!".format(x, y))

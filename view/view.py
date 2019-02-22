@@ -48,7 +48,6 @@ class ImageManager:
                 if height == 0 and width > 0:
                     height = int(orig_height * width/orig_width)
 
-
                 if height > 0 and width == 0:
                     width = int(orig_width * height/orig_height)
 
@@ -69,16 +68,17 @@ class ImageManager:
         new_skin = (new_skin_name, {
 
             model.WorldMap.TILE_GRASS: "3dhexagonLightGreen.png",
-            model.WorldMap.TILE_SCRUB: "3dhexagonGreen.png",
+            model.WorldMap.TILE_SCRUB: "scrub2.png",
             model.WorldMap.TILE_FOREST: "3dhexagonDarkGreen.png",
-            model.WorldMap.TILE_SEA: "3dhexagonBlue.png",
-            model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlue.png",
+            model.WorldMap.TILE_SEA: "sea.png",
+            model.WorldMap.TILE_DEEP_SEA: "sea.png",
             model.WorldMap.TILE_SHORE: "3dhexagonLightBlue.png",
             model.WorldMap.TILE_ICE: "3dhexagonGrey.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGrey.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhite.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrown.png",
             model.WorldMap.TILE_SAND: "3dhexagonYellow2.png",
+            model.WorldMap.TILE_BORDER: "3dhexagonBlack.png",
             GameView.TILE_HIGHLIGHT: "3dhexagonHighlight.png",
             model.WorldMap.STRUCTURE_SMALL_HOUSE:"SmallHouse2.png",
             model.WorldMap.STRUCTURE_BIG_HOUSE: "BigHouse.png",
@@ -494,9 +494,11 @@ class GameView(BaseView):
     Y_SQUASH = 0.75
     TILE_ROTATE_ANGLE = 30
     TILE_IMAGE_WIDTH = 128
-    CREATION_IMAGE_WIDTH = 96
+    #TILE_IMAGE_WIDTH = 64
+    CREATION_IMAGE_WIDTH = int(TILE_IMAGE_WIDTH * 0.75)
     # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
+    #TILE_IMAGE_HEIGHT = 64
     TILE_ALTITUDE_FACTOR = 6
     TILE_ALTITUDE_ALPHA_BASE = 200
     TILE_ALTITUDE_ALPHA_FACTOR = 0
@@ -590,8 +592,8 @@ class GameView(BaseView):
 
         self.surface.fill(GameReadyView.BG_COLOUR)
 
-        x = 0
-        y = GameView.TILE_IMAGE_WIDTH
+        x = GameView.TILE_IMAGE_WIDTH * 0.25 * 0
+        y = int(GameView.TILE_IMAGE_HEIGHT * 1.5)
 
         # Load in the image to highlight the current active tile
         highlight_image = BaseView.image_manager.get_skin_image(GameView.TILE_HIGHLIGHT,
@@ -641,7 +643,8 @@ class GameView(BaseView):
                         # Draw text in the middle of the tile surface with teh tile name
                         tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH / 2)
                         ty = view_y + y -  + int(GameView.TILE_IMAGE_HEIGHT * 3/4 * GameView.Y_SQUASH)
-                        text = "  " + tile + "  "
+
+                        text = "  {0}  ".format(tile)
 
                         draw_text(self.surface,
                                   msg=text,
@@ -656,7 +659,7 @@ class GameView(BaseView):
                     creation = self.game.get_creation(map_x,map_y)
                     if creation is not None:
 
-                        # Get the image for teh creation based on its name
+                        # Get the image for the creation based on its name
                         image = BaseView.image_manager.get_skin_image(creation.name,
                                                                       width=GameView.CREATION_IMAGE_WIDTH,
                                                                       tick=self.tick_count)
