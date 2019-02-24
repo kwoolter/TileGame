@@ -67,19 +67,20 @@ class ImageManager:
         new_skin_name = ImageManager.DEFAULT_SKIN
         new_skin = (new_skin_name, {
 
-            model.WorldMap.TILE_GRASS: "3dhexagonLightGreen.png",
-            model.WorldMap.TILE_SCRUB: "scrub2.png",
-            model.WorldMap.TILE_FOREST: "3dhexagonDarkGreen.png",
-            model.WorldMap.TILE_SEA: "sea.png",
-            model.WorldMap.TILE_DEEP_SEA: "sea.png",
-            model.WorldMap.TILE_SHORE: "3dhexagonLightBlue.png",
-            model.WorldMap.TILE_ICE: "3dhexagonGrey.png",
-            model.WorldMap.TILE_ROCK: "3dhexagonDarkGrey.png",
+            model.WorldMap.TILE_GRASS: "3dhexagonLightGreenNew.png",
+            model.WorldMap.TILE_SCRUB: "3dhexagonGreenNew.png",
+            model.WorldMap.TILE_FOREST: "3dhexagonDarkGreenNew.png",
+            model.WorldMap.TILE_SEA: "3dhexagonBlueNew.png",
+            model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlueNew.png",
+            model.WorldMap.TILE_SHORE: "3dhexagonLightBlueNew.png",
+            model.WorldMap.TILE_ICE: "3dhexagonLightGreyNew.png",
+            model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhite.png",
-            model.WorldMap.TILE_EARTH: "3dhexagonBrown.png",
-            model.WorldMap.TILE_SAND: "3dhexagonYellow2.png",
+            model.WorldMap.TILE_EARTH: "3dhexagonBrownNew.png",
+            model.WorldMap.TILE_SAND: "3dhexagonYellowNew.png",
             model.WorldMap.TILE_BORDER: "3dhexagonBlack.png",
             GameView.TILE_HIGHLIGHT: "3dhexagonHighlight.png",
+            GameView.TILE_HIGHLIGHT2: "3dhexagonHighlight2.png",
             model.WorldMap.STRUCTURE_SMALL_HOUSE:"SmallHouse2.png",
             model.WorldMap.STRUCTURE_BIG_HOUSE: "BigHouse.png",
             model.WorldMap.STRUCTURE_CAVE: "Cave.png",
@@ -490,6 +491,7 @@ class GameView(BaseView):
     BG_COLOUR = Colours.DARK_GREY
 
     TILE_HIGHLIGHT = "Highlight"
+    TILE_HIGHLIGHT2 = "Highlight2"
 
     Y_SQUASH = 0.75
     TILE_ROTATE_ANGLE = 30
@@ -499,7 +501,7 @@ class GameView(BaseView):
     # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
     #TILE_IMAGE_HEIGHT = 64
-    TILE_ALTITUDE_FACTOR = 6
+    TILE_ALTITUDE_FACTOR = 10
     TILE_ALTITUDE_ALPHA_BASE = 200
     TILE_ALTITUDE_ALPHA_FACTOR = 0
 
@@ -603,6 +605,15 @@ class GameView(BaseView):
 
         highlight_image.set_alpha(150)
 
+        # Load in the image to highlight the current active tile
+        highlight2_image = BaseView.image_manager.get_skin_image(GameView.TILE_HIGHLIGHT2,
+                                                                width=GameView.TILE_IMAGE_WIDTH,
+                                                                height=int(GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH),
+                                                                tick=self.tick_count)
+
+        highlight2_image.set_alpha(150)
+
+
         # Loop through the number of row that the view is oging to display
         for tile_y in range(0, self.view_tiles_height):
 
@@ -640,11 +651,33 @@ class GameView(BaseView):
                         # Draw the tile highlight image over it
                         self.surface.blit(highlight_image, (view_x + x, view_y + y  - highlight_image.get_height()))
 
-                        # Draw text in the middle of the tile surface with teh tile name
+                        # Draw text in the middle of the tile surface with the tile name
                         tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH / 2)
                         ty = view_y + y -  + int(GameView.TILE_IMAGE_HEIGHT * 3/4 * GameView.Y_SQUASH)
 
                         text = "  {0}  ".format(tile)
+
+                        draw_text(self.surface,
+                                  msg=text,
+                                  x=tx,
+                                  y=ty,
+                                  size=16,
+                                  fg_colour=GameView.FG_COLOUR,
+                                  bg_colour=GameView.BG_COLOUR,
+                                  centre=True)
+
+                    # If the specified tile is adjacent to the current active tile
+                    elif model.HexagonMaths.is_adjacent(self.active_x, self.active_y, map_x, map_y):
+
+                        # Draw the tile highlight image over it
+                        self.surface.blit(highlight2_image, (view_x + x, view_y + y - highlight_image.get_height()))
+
+
+                        # Draw text in the middle of the tile surface with the tile name
+                        tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH / 2)
+                        ty = view_y + y -  + int(GameView.TILE_IMAGE_HEIGHT * 3/4 * GameView.Y_SQUASH)
+
+                        text = model.HexagonMaths.get_direction(self.active_x, self.active_y, map_x, map_y)
 
                         draw_text(self.surface,
                                   msg=text,

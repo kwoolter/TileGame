@@ -503,12 +503,14 @@ class WorldMap:
                 local_altitude_total, es, ss = topo_model_pass1[x][y]
                 local_altitude_points = 1
 
+                adjacent = HexagonMaths.adjacent(x,y)
+
                 # Get the heights of the surrounding points
-                for dx, dy in vectors:
-                    if self.is_valid_xy(x + dx, y + dy) is False:
+                for tx, ty in adjacent:
+                    if self.is_valid_xy(tx,ty) is False:
                         pass
                     else:
-                        local_altitude, es, ss = topo_model_pass1[x + dx][y + dy]
+                        local_altitude, es, ss = topo_model_pass1[tx][ty]
                         local_altitude_total += local_altitude
                         local_altitude_points += 1
 
@@ -599,3 +601,102 @@ class WorldMap:
             x = random.randint(0, self.width - 1)
             y = random.randint(0, self.height - 1)
             self.set(x, y, object_type)
+
+
+class HexagonMaths:
+    """ Helper class to navigate hexagon vectors to XY vectors"""
+
+    # Define the names of the Hexagon vectors
+    NORTH = "N"
+    SOUTH = "S"
+    NORTH_EAST = "NE"
+    SOUTH_EAST = "SE"
+    NORTH_WEST = "NW"
+    SOUTH_WEST = "SW"
+
+    # Hexagon vectors to dx,dy vectors dictionaries
+    # Even X values have different vectors to odd X values
+    HEX_TO_XY_EVEN = {
+
+        NORTH : (0,-1),
+        SOUTH: (0,1),
+        SOUTH_EAST: (1,0),
+        SOUTH_WEST:(-1,0),
+        NORTH_EAST:(1,-1),
+        NORTH_WEST:(-1,-1)
+    }
+
+    HEX_TO_XY_ODD = {
+
+        NORTH : (0,-1),
+        SOUTH: (0,1),
+        NORTH_EAST: (1,0),
+        NORTH_WEST:(-1,0),
+        SOUTH_EAST:(1,1),
+        SOUTH_WEST:(-1,1)
+    }
+
+    @staticmethod
+    def adjacent(x : int, y : int):
+        """ Return list of tiles adjacent to the specified tile"""
+        adjacent_tiles = []
+
+        if x % 2 == 0:
+            vectors = HexagonMaths.HEX_TO_XY_EVEN.values()
+        else:
+            vectors = HexagonMaths.HEX_TO_XY_ODD.values()
+
+        for dx,dy in vectors:
+            adjacent_tiles.append(((x+dx), (y+dy)))
+
+        return adjacent_tiles
+
+    @staticmethod
+    def is_adjacent(ax : int, ay : int, bx : int, by:int):
+        " Is a specified position (ax,ay) adjacent to (bx,by)?"
+
+        return (bx,by) in HexagonMaths.adjacent(ax, ay)
+
+    @staticmethod
+    def move_hex(origin_x : int, origin_y : int, direction : str):
+        """ Return a target (x,y) position based on a origin and Hexagaon direction vector """
+
+        if direction not in HexagonMaths.HEX_TO_XY.keys():
+            raise Exception("{0}.move(): {0} is not a valid direction!".format(direction))
+
+        if origin_x % 2 == 0:
+            vectors = HexagonMaths.HEX_TO_XY_EVEN
+        else:
+            vectors = HexagonMaths.HEX_TO_XY_ODD
+
+        dx,dy = vectors[direction]
+
+        return (origin_x+dx), (origin_y+dy)
+
+    @staticmethod
+    def get_direction(origin_x : int, origin_y, target_x : int, target_y):
+        """ Return the hexagon vector name from an origin to a target"""
+
+        # If the origin and the target are not adjacent then raise an exception
+        if HexagonMaths.is_adjacent(origin_x, origin_y, target_x, target_y) is False:
+            raise Exception("Origin and target are not adjacent!")
+
+        if origin_x % 2 == 0:
+            vectors = HexagonMaths.HEX_TO_XY_EVEN
+        else:
+            vectors = HexagonMaths.HEX_TO_XY_ODD
+
+        # Calculate the xy vector to get to the target from the origin
+        dx = target_x - origin_x
+        dy = target_y - origin_y
+
+        # If the xy vector in the Hex to xy dictionary...
+        if (dx,dy) in vectors.values():
+
+            # Find the xy vector in the look-up dictionary and return the Hex vector name
+            pos = list(vectors.values()).index((dx, dy))
+            return list(vectors.keys())[pos]
+
+        # Else we couldn't find a bame for this vector
+        else:
+            return "???"
