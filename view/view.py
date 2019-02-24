@@ -72,10 +72,10 @@ class ImageManager:
             model.WorldMap.TILE_FOREST: "3dhexagonDarkGreenNew.png",
             model.WorldMap.TILE_SEA: "3dhexagonBlueNew.png",
             model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlueNew.png",
-            model.WorldMap.TILE_SHORE: "3dhexagonLightBlueNew.png",
+            model.WorldMap.TILE_SHALLOWS: "3dhexagonLightBlueNew.png",
             model.WorldMap.TILE_ICE: "3dhexagonLightGreyNew.png",
             model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
-            model.WorldMap.TILE_SNOW: "3dhexagonWhite.png",
+            model.WorldMap.TILE_SNOW: "3dhexagonWhiteNew.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrownNew.png",
             model.WorldMap.TILE_SAND: "3dhexagonYellowNew.png",
             model.WorldMap.TILE_BORDER: "3dhexagonBlack.png",
@@ -501,7 +501,7 @@ class GameView(BaseView):
     # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
     #TILE_IMAGE_HEIGHT = 64
-    TILE_ALTITUDE_FACTOR = 10
+    TILE_ALTITUDE_FACTOR = 8
     TILE_ALTITUDE_ALPHA_BASE = 200
     TILE_ALTITUDE_ALPHA_FACTOR = 0
 

@@ -343,7 +343,7 @@ class WorldMap:
     MAX_SLOPE = MAX_ALTITUDE * 0.15  # Maximum slope
     MIN_SLOPE = MAX_SLOPE * -1.0  # Minimum slope is the negative of maximum slope
     MAX_SLOPE_DELTA = MAX_SLOPE * 2.0  # How much can the slope change
-    MIN_ALTITUDE_CLIP_FACTOR = -0.75  # How many STDEV from the mean do we create a floor
+    MIN_ALTITUDE_CLIP_FACTOR = -1.0 # How many STDEV from the mean do we create a floor
     ALTITUDE_OFFSET = 0.0
     MIN_ALTITUDE = 0.0  # Lowest Altitude
 
@@ -351,7 +351,7 @@ class WorldMap:
     TILE_GRASS = "Grass"
     TILE_SEA = "Sea"
     TILE_DEEP_SEA = "Deep Sea"
-    TILE_SHORE = "Shallows"
+    TILE_SHALLOWS = "Shallows"
     TILE_SNOW = "Snow"
     TILE_ICE = "Ice"
     TILE_EARTH = "Earth"
@@ -361,20 +361,21 @@ class WorldMap:
     TILE_SCRUB = "Scrub"
     TILE_BORDER = "Border"
 
-    # Map of altitude to tile zone - numbers in stdevs away from the mean
+    # Map of altitude to tile zone
+    # Numbers are in stdevs away from the mean
     topo_zones = {
 
-        TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 2.0,
+        TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.6,
         TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.25,
-        TILE_SHORE: MIN_ALTITUDE_CLIP_FACTOR * 1.0,
-        TILE_SAND: -0.5,
+        TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 1.0,
+        TILE_SAND: MIN_ALTITUDE_CLIP_FACTOR * 0.7,
         TILE_GRASS: 0.4,
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.9,
-        TILE_ICE: 2.3,
-        TILE_SNOW: 2.4
+        TILE_ICE: 2.2,
+        TILE_SNOW: 2.3
 
     }
 
@@ -413,6 +414,15 @@ class WorldMap:
         # Pass 1: Set tile contents based on height range
         print("Pass 1: Setting tile based on altitude...")
 
+        # Initialise a dictionary to keep track of how many tiles for each zone be assign
+        tile_counts = {}
+        tiles = list(WorldMap.topo_zones.keys())
+        tiles.append(WorldMap.TILE_BORDER)
+        tiles.append(WorldMap.TILE_SEA)
+
+        for tile in tiles:
+            tile_counts[tile] = 0
+
         # Get the mean and stdev of the all altitudes
         a_mean = self.altitude_mean
         a_std = self.altitude_std
@@ -426,11 +436,6 @@ class WorldMap:
 
                 if x == 0 or x == (self.width - 1) or y == 0 or y == (self.height - 1):
                     tile = WorldMap.TILE_BORDER
-                    self.set_altitude(self.altitude_max, x, y)
-
-                # If altitude is zero we are at sea level
-                elif a == 0:
-                    tile = WorldMap.TILE_SEA
 
                 # Else use topo zones to place a point in a zone based on its altitude
                 else:
@@ -440,9 +445,31 @@ class WorldMap:
 
                 self.set(x, y, tile)
 
+                tile_counts[tile] += 1
+
+
+        print("Tiles assigned (count={0}: {1}".format(sum(tile_counts.values()),tile_counts))
+        print("Altitude Data: mean:{0:.3f} stdev:{1:.3f} min:{2:.3f} max:{3:.3f}".format(self.altitude_mean,
+                                                          self.altitude_std,
+                                                          self.altitude_min,
+                                                          self.altitude_max))
+
+        print("Pass 2: Altering altitudes...")
+        # loop through all points on the map...
+        for y in range(0, self.height):
+            for x in range(0, self._width):
                 # For all altitudes less than zero (underwater) set to zero to create flat sea surface
                 if self.get_altitude(x, y) <= 0:
                     self.set_altitude(0, x, y)
+
+                # For all border riles set altitude to max
+                elif self.get(x,y) == WorldMap.TILE_BORDER:
+                    self.set_altitude(self.altitude_max, x, y)
+
+        print("New altitude Data: mean:{0:.3f} stdev:{1:.3f} min:{2:.3f} max:{3:.3f}".format(self.altitude_mean,
+                                                          self.altitude_std,
+                                                          self.altitude_min,
+                                                          self.altitude_max))
 
 
     def generate_topology(self):
@@ -492,9 +519,6 @@ class WorldMap:
         # Perform second pass averaging based on adjacent altitudes to smooth out topography
         print("Pass 2: averaging out using neighbouring points...")
 
-        # Define which neighboring points we are going to look at
-        vectors = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1))
-
         # Iterate through each point in the map
         for y in range(0, self._height):
             for x in range(0, self._width):
@@ -503,6 +527,7 @@ class WorldMap:
                 local_altitude_total, es, ss = topo_model_pass1[x][y]
                 local_altitude_points = 1
 
+                # Get the list of adjacent tiles
                 adjacent = HexagonMaths.adjacent(x,y)
 
                 # Get the heights of the surrounding points
@@ -581,6 +606,10 @@ class WorldMap:
         if self.is_valid_xy(x, y) is False:
             raise Exception("Trying to set altitude at ({0},{1}) which is outside of the world!".format(x, y))
         self.topo_model_pass2[x][y] = new_altitude
+
+    @property
+    def altitude_min(self):
+        return numpy.min(self.topo_model_pass2)
 
     @property
     def altitude_max(self):

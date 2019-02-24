@@ -126,7 +126,7 @@ class Game:
 
         # Check if a creation can be built on the current tile...
         tile = self.map.get(x, y)
-        if self.map.get(x, y) in (WorldMap.TILE_SHORE, WorldMap.TILE_SEA, WorldMap.TILE_DEEP_SEA):
+        if self.map.get(x, y) in (WorldMap.TILE_SHALLOWS, WorldMap.TILE_SEA, WorldMap.TILE_DEEP_SEA):
 
             EventQueue.add_event(Event(Game.EVENT_ACTION_FAIL,
                                        "Can't build creations on {0}!".format(tile),
@@ -172,6 +172,7 @@ class Game:
             return None
 
     def new_map(self):
+        self.creations = {}
         self.map.initialise()
 
     def tick(self):
