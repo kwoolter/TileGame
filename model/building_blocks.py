@@ -374,8 +374,8 @@ class WorldMap:
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.9,
-        TILE_ICE: 2.2,
-        TILE_SNOW: 2.3
+        TILE_ICE: 2.1,
+        TILE_SNOW: 2.2
 
     }
 
@@ -458,13 +458,14 @@ class WorldMap:
         # loop through all points on the map...
         for y in range(0, self.height):
             for x in range(0, self._width):
+                # For all border riles set altitude to max
+                if self.get(x,y) == WorldMap.TILE_BORDER:
+                    self.set_altitude(self.altitude_max, x, y)
+
                 # For all altitudes less than zero (underwater) set to zero to create flat sea surface
-                if self.get_altitude(x, y) <= 0:
+                elif self.get_altitude(x, y) <= 0:
                     self.set_altitude(0, x, y)
 
-                # For all border riles set altitude to max
-                elif self.get(x,y) == WorldMap.TILE_BORDER:
-                    self.set_altitude(self.altitude_max, x, y)
 
         print("New altitude Data: mean:{0:.3f} stdev:{1:.3f} min:{2:.3f} max:{3:.3f}".format(self.altitude_mean,
                                                           self.altitude_std,

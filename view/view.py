@@ -73,8 +73,8 @@ class ImageManager:
             model.WorldMap.TILE_SEA: "3dhexagonBlueNew.png",
             model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlueNew.png",
             model.WorldMap.TILE_SHALLOWS: "3dhexagonLightBlueNew.png",
-            model.WorldMap.TILE_ICE: "3dhexagonLightGreyNew.png",
-            model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
+            model.WorldMap.TILE_ICE: "3dhexagonGreyNew.png",
+            model.WorldMap.TILE_ROCK: "3dhexagonDarkGreyNew.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhiteNew.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrownNew.png",
             model.WorldMap.TILE_SAND: "3dhexagonYellowNew.png",
@@ -772,7 +772,7 @@ class GameOverView(BaseView):
 
 class InventoryView(BaseView):
 
-    FILL_COLOUR = Colours.GREEN
+    FILL_COLOUR = Colours.DARK_GREY
     FG_COLOUR = Colours.WHITE
     BG_COLOUR = Colours.BLACK
     ITEM_TEXT_FONT_SIZE = 16
