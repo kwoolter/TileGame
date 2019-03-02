@@ -2,6 +2,7 @@ import logging
 import os
 
 import model
+
 from .graphics import *
 
 
@@ -79,8 +80,8 @@ class ImageManager:
             model.WorldMap.TILE_EARTH: "3dhexagonBrownNew.png",
             model.WorldMap.TILE_SAND: "3dhexagonYellowNew.png",
             model.WorldMap.TILE_BORDER: "3dhexagonBlack.png",
-            GameView.TILE_HIGHLIGHT: "3dhexagonHighlight.png",
-            GameView.TILE_HIGHLIGHT2: "3dhexagonHighlight2.png",
+            GameView.TILE_HIGHLIGHT: "3dhexagonHighlight3.png",
+            GameView.TILE_HIGHLIGHT2: "3dhexagonHighlight.png",
             model.WorldMap.STRUCTURE_SMALL_HOUSE:"SmallHouse2.png",
             model.WorldMap.STRUCTURE_BIG_HOUSE: "BigHouse.png",
             model.WorldMap.STRUCTURE_CAVE: "Cave.png",
@@ -88,12 +89,42 @@ class ImageManager:
             model.WorldMap.STRUCTURE_FORT: "Fort.png",
             model.WorldMap.STRUCTURE_MARKET: "market.png",
             model.WorldMap.MATERIAL_TREE: "tree.png",
-            model.WorldMap.MATERIAL_TREE2: "tree2.png",
+            model.WorldMap.MATERIAL_TREE2: "tree1.png",
             model.WorldMap.MATERIAL_TREE3: "mango_tree.png",
             model.WorldMap.MATERIAL_SCRUB1: "scrub1.png",
             model.WorldMap.MATERIAL_PLANT1: "plant1.png",
             model.WorldMap.FOOD_STRAWBERRIES: "strawberries.png",
             model.WorldMap.FOOD_CARROTS: "carrots.png",
+
+        })
+
+        ImageManager.skins[new_skin_name] = new_skin
+
+        # Add the skin for Winter graphics
+        new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.WINTER]
+        new_skin = (new_skin_name,{
+
+            model.WorldMap.TILE_ICE: "3dhexagonWhiteNew.png",
+            model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
+            model.WorldMap.TILE_EARTH: "3dhexagonGreyNew.png",
+            model.WorldMap.TILE_SHALLOWS: "3dhexagonWhiteNew.png",
+        })
+
+        ImageManager.skins[new_skin_name] = new_skin
+
+        # Add the skin for Growing graphics
+        new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.GROWING]
+        new_skin = (new_skin_name,{
+
+        })
+
+        ImageManager.skins[new_skin_name] = new_skin
+
+        # Add the skin for Harvesting graphics
+        new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.HARVESTING]
+        new_skin = (new_skin_name,{
+            model.WorldMap.TILE_GRASS: "3dhexagonYellowNew.png",
+
 
         })
 
@@ -414,8 +445,33 @@ class StatusBar(BaseView):
 
         if self.game.state == model.Game.STATE_PLAYING:
 
-            y = 8
-            x = int(pane_rect.width * 3 / 4)
+            y = int(pane_rect.height / 2)
+            x = 10
+
+            msg = "Year:{0}".format(self.game.current_year)
+
+            draw_text(self.surface,
+                      msg=msg,
+                      x=x,
+                      y=y,
+                      fg_colour=StatusBar.FG_COLOUR,
+                      bg_colour=StatusBar.BG_COLOUR,
+                      size=StatusBar.STATUS_TEXT_FONT_SIZE,
+                      centre=False)
+
+            x+=80
+
+            msg = self.game.current_season_name
+            #msg = str(self.game.stats.get_stat(model.CurrentSeason.NAME).value)
+            draw_text(self.surface,
+                      msg=msg,
+                      x=x,
+                      y=y,
+                      fg_colour=StatusBar.FG_COLOUR,
+                      bg_colour=StatusBar.BG_COLOUR,
+                      size=StatusBar.STATUS_TEXT_FONT_SIZE,
+                      centre=False)
+
 
         elif self.game.state == model.Game.STATE_PAUSED:
             msg = "Esc:Resume   F5:Toggle Sound   F6:Toggle Music   F4:Quit"
@@ -493,7 +549,7 @@ class GameView(BaseView):
     TILE_HIGHLIGHT = "Highlight"
     TILE_HIGHLIGHT2 = "Highlight2"
 
-    Y_SQUASH = 0.75
+    Y_SQUASH = 1.0
     TILE_ROTATE_ANGLE = 30
     TILE_IMAGE_WIDTH = 128
     #TILE_IMAGE_WIDTH = 64
@@ -512,15 +568,22 @@ class GameView(BaseView):
         self.surface = pygame.Surface((width, height))
 
     def initialise(self, game: model.Game):
+
         self.game = game
 
+        # Calculate dx and dy when moving in those directions
         self.dx = GameView.TILE_IMAGE_WIDTH * 3 / 4
         self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2)
 
-        self.view_tiles_width = 16
-        self.view_tiles_height = 15
+        rect = self.surface.get_rect()
 
-        self.set_view_origin(0, 0)
+        # Calculate how many tiles we can display
+        self.view_tiles_width = int(rect.width / (GameView.TILE_IMAGE_WIDTH * 3/4)) + 1
+        self.view_tiles_height = int(rect.height / (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2))
+
+        # Set the view of the model to be at the centre of the map
+        self.set_view_origin(int((self.game.map.width - self.view_tiles_width)/2),
+                             int((self.game.map.height - self.view_tiles_height)/2))
         self.set_active()
 
     def model_to_view(self, x: int, y: int, z: int = 0):
@@ -534,7 +597,7 @@ class GameView(BaseView):
 
     def set_view_origin(self, x: int = 0, y: int = 0, relative: bool = False):
 
-        if relative == False:
+        if relative is False:
             if self.game.map.is_valid_xy(x, y) is False or \
                     self.game.map.is_valid_xy(x + self.view_tiles_width, y + self.view_tiles_height) is False:
                 raise Exception(
@@ -554,33 +617,43 @@ class GameView(BaseView):
         print("BaseView origin set to ({0},{1})".format(self.view_origin_x, self.view_origin_y))
 
     def set_active(self, x: int = 0, y: int = 0, relative: bool = False):
+        """ Set which tile is the current active selection in the view """
 
+        # Be default set active tile to the one in the middle of the current view
         if (x,y) == (0,0):
             new_x = int(self.view_origin_x + (self.view_tiles_width-1)/2)
             new_y = int(self.view_origin_y + (self.view_tiles_height-1)/2)
+
+        # If setting to absolute (non-relative to current active...
         elif relative is False:
             new_x = x
             new_y = y
+
+        # Else set relative to current active
         else:
             new_x = self.active_x + x
             new_y = self.active_y + y
 
+        # If the new active selection is outside of the map then throw exception
         if self.game.map.is_valid_xy(new_x, new_y) is False:
             raise Exception(
                 "Trying to set active tile at ({0},{1}) which is out of bounds of the view".format(new_x, new_y))
 
+        # all good so change current active selection to the new one
         self.active_y = new_y
         self.active_x = new_x
         print("Set active tile to ({0},{1})".format(self.active_x, self.active_y))
 
-        if self.active_x < self.view_origin_x:
+        # If the current active selection moves to the edges of the current view then
+        # Move the view to keep inline with the active selection
+        if self.active_x <= self.view_origin_x:
             self.set_view_origin(-1,0, relative=True)
-        elif self.active_x > (self.view_origin_x + self.view_tiles_width - 3):
+        elif self.active_x > (self.view_origin_x + self.view_tiles_width - 1):
             self.set_view_origin(1, 0, relative=True)
 
         if self.active_y < self.view_origin_y:
             self.set_view_origin(0, -1, relative=True)
-        elif self.active_y > (self.view_origin_y + self.view_tiles_height - 3):
+        elif self.active_y > (self.view_origin_y + self.view_tiles_height - 2):
             self.set_view_origin(0, 1, relative=True)
 
     @property
@@ -588,9 +661,12 @@ class GameView(BaseView):
         return (self.active_x, self.active_y)
 
     def draw(self):
+        """" Draw the game view """
 
         if self.game is None:
             raise ("No Game to view!")
+
+        skin_name = self.game.current_season_name
 
         self.surface.fill(GameReadyView.BG_COLOUR)
 
@@ -639,7 +715,8 @@ class GameView(BaseView):
                     image = BaseView.image_manager.get_skin_image(tile,
                                                                   width=GameView.TILE_IMAGE_WIDTH,
                                                                   height=int(GameView.TILE_IMAGE_HEIGHT* GameView.Y_SQUASH),
-                                                                  tick=self.tick_count)
+                                                                  tick=self.tick_count,
+                                                                  skin_name=skin_name)
 
                     # Convert the model coords to view coords and blit the tile image at that location
                     view_x, view_y = self.model_to_view(map_x, map_y)
@@ -707,7 +784,6 @@ class GameView(BaseView):
                         view_x, view_y = self.model_to_view(map_x, map_y, 1)
                         self.surface.blit(image, (view_x + int((GameView.TILE_IMAGE_WIDTH-GameView.CREATION_IMAGE_WIDTH)/2),
                                           view_y + y - image.get_height()))
-
 
                         text = ""
                         if creation.is_complete is False:

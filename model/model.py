@@ -9,6 +9,8 @@ from .building_blocks import ResourceFactory
 from .building_blocks import WorldMap
 from .utils import Event
 from .utils import EventQueue
+from .StatEngine import *
+from .game_stats import *
 
 
 class Objects:
@@ -49,6 +51,7 @@ class Game:
         self._state = Game.STATE_LOADED
         self.tick_count = 0
 
+        self.stats = KingdomStats()
         self.inventory = None
         self.resources = None
         self.creatables = None
@@ -70,9 +73,20 @@ class Game:
                                    "Game state change from {0} to {1}".format(self._old_state, self._state),
                                    Event.STATE))
 
+    @property
+    def current_year(self):
+        return self.stats.get_stat(CurrentYear.NAME).value
+
+    @property
+    def current_season_name(self):
+        season =  int(self.stats.get_stat(CurrentSeason.NAME).value)
+        return CurrentSeason.season_number_to_name[season]
+
     def initialise(self):
 
         self.state = Game.STATE_READY
+
+        self.stats.initialise()
 
         self.inventory = Inventory()
         self.resources = ResourceFactory(os.path.join(Game.GAME_DATA_DIR, "resources.csv"))
@@ -88,7 +102,7 @@ class Game:
 
         for type in resource_types:
             new_resource = ResourceFactory.get_resource(type)
-            self.inventory.add_resource(new_resource, random.randint(20, 160))
+            self.inventory.add_resource(new_resource, random.randint(100020, 1000160))
 
         self.creations = {}
         self.add_initial_creations()
@@ -126,7 +140,10 @@ class Game:
 
         # Check if a creation can be built on the current tile...
         tile = self.map.get(x, y)
-        if self.map.get(x, y) in (WorldMap.TILE_SHALLOWS, WorldMap.TILE_SEA, WorldMap.TILE_DEEP_SEA):
+        if self.map.get(x, y) in (WorldMap.TILE_SHALLOWS,
+                                  WorldMap.TILE_SEA,
+                                  WorldMap.TILE_DEEP_SEA,
+                                  WorldMap.TILE_BORDER):
 
             EventQueue.add_event(Event(Game.EVENT_ACTION_FAIL,
                                        "Can't build creations on {0}!".format(tile),
@@ -181,6 +198,8 @@ class Game:
             return
 
         self.tick_count += 1
+
+        self.stats.update_stat(KingdomStats.INPUT_TICK_COUNT, self.tick_count)
 
         EventQueue.add_event(Event(Game.TICK,
                                    "Game ticked to {0}".format(self.tick_count),
