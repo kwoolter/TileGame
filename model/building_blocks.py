@@ -384,7 +384,7 @@ class WorldMap:
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
-        TILE_ROCK: 1.9,
+        TILE_ROCK: 1.8,
         TILE_ICE: 2.1,
         TILE_SNOW: 2.2
 
@@ -403,8 +403,8 @@ class WorldMap:
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
-        TILE_ROCK: 1.9,
-        TILE_ICE: 2.1,
+        TILE_ROCK: 1.8,
+        TILE_ICE: 2.0,
         TILE_SNOW: 2.2
 
     }
@@ -412,18 +412,18 @@ class WorldMap:
     topo_zone_themes[THEME_GROWING] = topo_zones
 
 
-    # Define the topo zones for the Harvest season
+    # Define the topo zones for the Harvesting season
     topo_zones = {
 
-        TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.7,# Seas level falls
-        TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.45,# Seas level falls
-        TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 1.1, # Seas level falls
+        TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.7,# Sea level falls
+        TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.45,# Sea level falls
+        TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 1.1, # Sea level falls
         TILE_SAND: MIN_ALTITUDE_CLIP_FACTOR * 0.7,
         TILE_GRASS: 0.4,
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
-        TILE_ROCK: 1.9,
+        TILE_ROCK: 1.9, # Ice level rises
         TILE_ICE: 2.2, # Ice level rises
         TILE_SNOW: 2.3 # Snow level rises
 
@@ -441,10 +441,10 @@ class WorldMap:
         TILE_GRASS: 0.4,
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
-        TILE_EARTH: 1.3,
-        #TILE_ROCK: 1.9,
-        TILE_ICE: 1.8, # Ice level lowers
-        TILE_SNOW: 1.9 # Snow level lowers
+        TILE_EARTH: 1.5,
+        TILE_ROCK: 1.6,
+        TILE_ICE: 1.82, # Ice level lowers
+        TILE_SNOW: 1.98 # Snow level lowers
 
     }
 
