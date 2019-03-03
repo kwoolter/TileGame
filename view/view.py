@@ -104,10 +104,10 @@ class ImageManager:
         new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.WINTER]
         new_skin = (new_skin_name,{
 
-            model.WorldMap.TILE_ICE: "3dhexagonWhiteNew.png",
-            model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
-            model.WorldMap.TILE_EARTH: "3dhexagonGreyNew.png",
-            model.WorldMap.TILE_SHALLOWS: "3dhexagonWhiteNew.png",
+            # model.WorldMap.TILE_ICE: "3dhexagonWhiteNew.png",
+            # model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
+            # model.WorldMap.TILE_EARTH: "3dhexagonGreyNew.png",
+            # model.WorldMap.TILE_SHALLOWS: "3dhexagonWhiteNew.png",
         })
 
         ImageManager.skins[new_skin_name] = new_skin
@@ -123,7 +123,7 @@ class ImageManager:
         # Add the skin for Harvesting graphics
         new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.HARVESTING]
         new_skin = (new_skin_name,{
-            model.WorldMap.TILE_GRASS: "3dhexagonYellowNew.png",
+            # model.WorldMap.TILE_GRASS: "3dhexagonYellowNew.png",
 
 
         })
@@ -448,7 +448,10 @@ class StatusBar(BaseView):
             y = int(pane_rect.height / 2)
             x = 10
 
-            msg = "Year:{0}".format(self.game.current_year)
+            msg = "Year {0} changed={1} ({2} season changed={3})".format(self.game.current_year,
+                                                                         self.game.is_year_changed,
+                                                             self.game.current_season_name,
+                                                             self.game.is_season_changed)
 
             draw_text(self.surface,
                       msg=msg,
@@ -458,20 +461,6 @@ class StatusBar(BaseView):
                       bg_colour=StatusBar.BG_COLOUR,
                       size=StatusBar.STATUS_TEXT_FONT_SIZE,
                       centre=False)
-
-            x+=80
-
-            msg = self.game.current_season_name
-            #msg = str(self.game.stats.get_stat(model.CurrentSeason.NAME).value)
-            draw_text(self.surface,
-                      msg=msg,
-                      x=x,
-                      y=y,
-                      fg_colour=StatusBar.FG_COLOUR,
-                      bg_colour=StatusBar.BG_COLOUR,
-                      size=StatusBar.STATUS_TEXT_FONT_SIZE,
-                      centre=False)
-
 
         elif self.game.state == model.Game.STATE_PAUSED:
             msg = "Esc:Resume   F5:Toggle Sound   F6:Toggle Music   F4:Quit"
@@ -709,7 +698,7 @@ class GameView(BaseView):
                     map_x = tile_x + self.view_origin_x + xx
 
                     # Get the specified tile from the model
-                    tile = self.game.map.get(map_x, map_y)
+                    tile = self.game.map.get(map_x, map_y, theme=skin_name)
 
                     # Get the image associated with that tile name
                     image = BaseView.image_manager.get_skin_image(tile,

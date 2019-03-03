@@ -41,6 +41,7 @@ class Game:
     QUIT = "Quit"
 
     EVENT_ACTION_FAIL = "Action failed"
+    EVENT_SOMETHING_HAPPENED = "Something Happened"
 
     SAVE_GAME_DIR = os.path.join(os.path.dirname(__file__), "saves")
     GAME_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
@@ -81,6 +82,14 @@ class Game:
     def current_season_name(self):
         season =  int(self.stats.get_stat(CurrentSeason.NAME).value)
         return CurrentSeason.season_number_to_name[season]
+
+    @property
+    def is_season_changed(self):
+        return self.stats.get_stat(SeasonChanged.NAME).value
+
+    @property
+    def is_year_changed(self):
+        return self.stats.get_stat(YearChanged.NAME).value
 
     def initialise(self):
 
@@ -200,6 +209,15 @@ class Game:
         self.tick_count += 1
 
         self.stats.update_stat(KingdomStats.INPUT_TICK_COUNT, self.tick_count)
+
+        # See if any of the event stats fires as a result if the tick...
+        for event_stat_name in KingdomStats.EVENTS:
+            stat = self.stats.get_stat(event_stat_name)
+            if stat.value is True:
+                EventQueue.add_event(Event(stat.name,
+                                           "Event stat fired: {0}={1}".format(stat.name, stat.value),
+                                           Game.EVENT_SOMETHING_HAPPENED))
+
 
         EventQueue.add_event(Event(Game.TICK,
                                    "Game ticked to {0}".format(self.tick_count),

@@ -35,8 +35,8 @@ class Controller:
         pygame.mixer.pre_init(44100, -16, 2, 2048)
         pygame.mixer.init()
 
-        self.audio.is_music_on = True
-        self.audio.is_sound_on = True
+        self.audio.is_music_on = False
+        self.audio.is_sound_on = False
 
     def run(self):
 
