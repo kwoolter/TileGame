@@ -5,6 +5,7 @@ import random
 from xml.dom.minidom import *
 from .utils import EventQueue
 from .utils import Event
+from operator import itemgetter
 
 import numpy
 
@@ -361,12 +362,14 @@ class WorldMap:
     TILE_SCRUB = "Scrub"
     TILE_BORDER = "Border"
 
+    WATER = (TILE_SEA, TILE_DEEP_SEA, TILE_SHALLOWS)
+
     # Map of altitude to tile zone
 
     THEME_DEFAULT = "Default"
     THEME_WINTER = "Winter"
     THEME_GROWING = "Growing"
-    THEME_HARVEST = "Harvest"
+    THEME_HARVEST = "Harvesting"
     topo_zone_themes = {}
 
     # Define the topo zones for the Default theme
@@ -408,14 +411,15 @@ class WorldMap:
 
     topo_zone_themes[THEME_GROWING] = topo_zones
 
+
     # Define the topo zones for the Harvest season
     topo_zones = {
 
-        TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.7,# Sea level falls
-        TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.5, # Sea level falls
-        TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 1.3,# Sea level falls
-        TILE_SAND: MIN_ALTITUDE_CLIP_FACTOR * 0.8, # Sand level rises
-        TILE_GRASS: 0.5, # Grass level rises
+        TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.7,# Seas level falls
+        TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.45,# Seas level falls
+        TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 1.1, # Seas level falls
+        TILE_SAND: MIN_ALTITUDE_CLIP_FACTOR * 0.7,
+        TILE_GRASS: 0.4,
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
@@ -431,13 +435,13 @@ class WorldMap:
     topo_zones = {
 
         TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.5,# Sea level rises
-        TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.3,# Sea level rises
+        TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.2,# Sea level rises
         TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 0.8,# Sea level rises
         TILE_SAND: MIN_ALTITUDE_CLIP_FACTOR * 0.7,
         TILE_GRASS: 0.4,
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
-        TILE_EARTH: 1.5,
+        TILE_EARTH: 1.3,
         #TILE_ROCK: 1.9,
         TILE_ICE: 1.8, # Ice level lowers
         TILE_SNOW: 1.9 # Snow level lowers
@@ -488,7 +492,7 @@ class WorldMap:
                                                           self.altitude_max))
 
         print("Pass 2: Altering altitudes...")
-        self.set_sea_level()
+        #self.set_sea_level()
 
         print("New altitude Data: mean:{0:.3f} stdev:{1:.3f} min:{2:.3f} max:{3:.3f}".format(self.altitude_mean,
                                                           self.altitude_std,
@@ -496,21 +500,28 @@ class WorldMap:
                                                           self.altitude_max))
 
     def altitude_to_tile(self, theme : str = THEME_DEFAULT):
+        """Build a maps of tiles using a specified theme to determine what tile should be in each altitude range"""
 
+        # If we don't recognise the specified theme then just use the default
         if theme not in WorldMap.topo_zone_themes.keys():
             theme = WorldMap.THEME_DEFAULT
+            print("theme {0} not recognised so using default".format(theme))
 
         # Clear the map squares
         map = [[WorldMap.TILE_EARTH for y in range(0, self._height)] for x in range(0, self._width)]
 
-        # Get the topo zones associated with the specified theme
-        topo_zone = WorldMap.topo_zone_themes[theme]
+        # Get the topo zones associated with the specified theme and create a list sorted by lowest zone first
+        topo_zone = []
+        for key, value in WorldMap.topo_zone_themes[theme].items():
+            topo_zone.append((key,value))
+        topo_zone.sort(key=itemgetter(1))
+
+        print(theme, str(topo_zone))
 
         # Initialise a dictionary to keep track of how many tiles for each zone be assign
         tile_counts = {}
-        tiles = list(topo_zone.keys())
+        tiles = list(WorldMap.topo_zone_themes[theme].keys())
         tiles.append(WorldMap.TILE_BORDER)
-        tiles.append(WorldMap.TILE_SEA)
 
         for tile in tiles:
             tile_counts[tile] = 0
@@ -526,14 +537,15 @@ class WorldMap:
                 # Get the altitude at the selected point on the map
                 a = self.get_altitude(x, y)
 
-                # If this is the edge of the map sat to a border
+                # If this is the edge of the map set to a border
                 if x == 0 or x == (self.width - 1) or y == 0 or y == (self.height - 1):
                     tile = WorldMap.TILE_BORDER
 
                 # Else use topo zones to place a point in a zone based on its altitude
                 else:
-                    for tile, altitude in topo_zone.items():
-                        if a < a_mean + (a_std * altitude):
+                    for tile, altitude in topo_zone:
+                        # If the altitude is less than the zone then use the zone and break.
+                        if a < (a_mean + (a_std * altitude)):
                             break
 
                 map[x][y] = tile
@@ -557,9 +569,9 @@ class WorldMap:
                 if self.get(x,y) == WorldMap.TILE_BORDER:
                     self.set_altitude(self.altitude_max, x, y)
 
-                # For all altitudes less than zero (underwater) set to zero to create flat sea surface
-                elif self.get_altitude(x, y) <= 0:
-                    self.set_altitude(0, x, y)
+                # # For all altitudes less than zero (underwater) set to zero to create flat sea surface
+                # elif self.get_altitude(x, y) <= 0:
+                #     self.set_altitude(0, x, y)
 
     def generate_topology(self):
         """Build a random map of altitudes using a multi-pass algorithm"""

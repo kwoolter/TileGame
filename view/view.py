@@ -560,7 +560,7 @@ class GameView(BaseView):
 
         self.game = game
 
-        # Calculate dx and dy when moving in those directions
+        # Calculate view dx and dy when moving in those directions
         self.dx = GameView.TILE_IMAGE_WIDTH * 3 / 4
         self.dy = (GameView.TILE_IMAGE_HEIGHT * GameView.Y_SQUASH / 2)
 
@@ -575,9 +575,12 @@ class GameView(BaseView):
                              int((self.game.map.height - self.view_tiles_height)/2))
         self.set_active()
 
-    def model_to_view(self, x: int, y: int, z: int = 0):
+    def model_to_view(self, x: int, y: int, z: int = 0, a_override : bool = False):
 
-        a = self.game.map.get_altitude(x, y) * GameView.TILE_ALTITUDE_FACTOR
+        if a_override is True:
+            a=0
+        else:
+            a = self.game.map.get_altitude(x, y) * GameView.TILE_ALTITUDE_FACTOR
 
         view_x = int((x - self.view_origin_x) * self.dx - (GameView.TILE_IMAGE_WIDTH * 3 / 4))
         view_y = int((y - self.view_origin_y) * self.dy + ((x % 2) * self.dy / 2) - (z * self.dy) - a)
@@ -708,7 +711,7 @@ class GameView(BaseView):
                                                                   skin_name=skin_name)
 
                     # Convert the model coords to view coords and blit the tile image at that location
-                    view_x, view_y = self.model_to_view(map_x, map_y)
+                    view_x, view_y = self.model_to_view(map_x, map_y, a_override=tile in (model.WorldMap.WATER))
                     self.surface.blit(image, (view_x + x, view_y + y -  image.get_height()))
 
                     # If the specified tile is the currently selected active tile...
