@@ -404,7 +404,7 @@ class StatusBar(BaseView):
 
         super(StatusBar, self).tick()
 
-        if self.tick_count % StatusBar.MESSAGE_TICK_DURATION == 0:
+        if self.game.state == model.Game.STATE_PLAYING and self.tick_count % StatusBar.MESSAGE_TICK_DURATION == 0:
 
             self.current_message_number += 1
             if self.current_message_number >= len(self.status_messages):
@@ -422,28 +422,30 @@ class StatusBar(BaseView):
 
         self.surface.fill(StatusBar.BG_COLOUR)
 
-        if len(self.status_messages) == 0 or self.current_message_number >= len(self.status_messages):
-            msg = ""
-        else:
-            msg, count = self.status_messages[self.current_message_number]
-
         pane_rect = self.surface.get_rect()
-
-        text_rect = pygame.Rect(0, 0, pane_rect.width / 2 - 4, pane_rect.height - 4)
-
-        self.text_box.fill(StatusBar.BG_COLOUR)
-
-        drawText(surface=self.text_box,
-                 text=msg,
-                 color=StatusBar.FG_COLOUR,
-                 rect=text_rect,
-                 font=pygame.font.SysFont(pygame.font.get_default_font(), StatusBar.STATUS_TEXT_FONT_SIZE),
-                 bkg=StatusBar.BG_COLOUR)
-
-        self.surface.blit(self.text_box, (pane_rect.width / 4, 4))
 
         if self.game.state == model.Game.STATE_PLAYING:
 
+            # Check if tehre are status messages that we can display
+            if len(self.status_messages) == 0 or self.current_message_number >= len(self.status_messages):
+                msg = ""
+            else:
+                msg, count = self.status_messages[self.current_message_number]
+
+            text_rect = pygame.Rect(0, 0, pane_rect.width / 2 - 4, pane_rect.height - 4)
+
+            self.text_box.fill(StatusBar.BG_COLOUR)
+
+            drawText(surface=self.text_box,
+                     text=msg,
+                     color=StatusBar.FG_COLOUR,
+                     rect=text_rect,
+                     font=pygame.font.SysFont(pygame.font.get_default_font(), StatusBar.STATUS_TEXT_FONT_SIZE),
+                     bkg=StatusBar.BG_COLOUR)
+
+            self.surface.blit(self.text_box, (pane_rect.width / 4, 4))
+
+            # Display other game status info...
             y = int(pane_rect.height / 2)
             x = 10
 
@@ -480,6 +482,7 @@ class StatusBar(BaseView):
                       bg_colour=StatusBar.BG_COLOUR,
                       size=StatusBar.STATUS_TEXT_FONT_SIZE,
                       centre=False)
+
         elif self.game.state == model.Game.STATE_GAME_OVER:
             msg = "SPACE:Continue   F4:Quit"
             draw_text(self.surface,
