@@ -9,3 +9,20 @@ out
 gen
 .gitignore
 .idea/
+.model/saves/*.world
+audio/__pycache__/
+controller/__pycache__/
+model/__pycache__/
+model/data/topo_renderer.xlsx
+view/__pycache__/
+view/resources/3dhexagon.png
+view/resources/3dhexagonGreyNew - Copy.png
+view/resources/3dhexagon_granite.png
+view/resources/HexBaseTemplate.png
+view/resources/cement.png
+view/resources/hexagon_a.png
+view/resources/hexagon_b - Copy.png
+view/resources/hexagon_b.png
+view/resources/hextiles_overview1.jpg
+view/resources/tree1.png
+/model/saves/Kingdom 2.world
