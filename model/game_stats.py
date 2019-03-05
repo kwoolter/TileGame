@@ -6,7 +6,7 @@ from .StatEngine import *
 class CurrentYear(DerivedStat):
     NAME = "Current Year"
 
-    TICKS_PER_YEAR = 15
+    TICKS_PER_YEAR = 30
 
     def __init__(self):
         super(CurrentYear, self).__init__(CurrentYear.NAME, "GAME")

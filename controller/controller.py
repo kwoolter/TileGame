@@ -17,6 +17,8 @@ class Controller:
     KEY_QUIT = K_F4
     KEY_SOUND_TOGGLE = K_F5
     KEY_MUSIC_TOGGLE = K_F6
+    KEY_LOAD = K_F11
+    KEY_SAVE = K_F12
 
     def __init__(self):
 
@@ -65,7 +67,7 @@ class Controller:
                 except Exception as err:
                     print(str(err))
 
-                if event.type == model.Game.QUIT:
+                if event.type == model.Game.EVENT_QUIT:
                     loop = False
 
                 event = self.game.get_next_event()
@@ -162,6 +164,10 @@ class Controller:
                             self.audio.sound_toggle()
                         elif event.key == Controller.KEY_MUSIC_TOGGLE:
                             self.audio.music_toggle()
+                        elif event.key == Controller.KEY_SAVE:
+                            self.game.save()
+                        elif event.key == Controller.KEY_LOAD:
+                            self.game.load()
                         elif event.key == Controller.KEY_QUIT:
                             loop = False
 

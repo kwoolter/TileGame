@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import pickle
 
 from .building_blocks import Creatable
 from .building_blocks import CreatableFactoryXML
@@ -36,15 +37,20 @@ class Game:
     STATE_BATTLE = "BATTLE"
     STATE_PAUSED = "PAUSED"
     STATE_GAME_OVER = "GAME OVER"
-    END = "END"
-    TICK = "Tick"
-    QUIT = "Quit"
+    EVENT_END = "END"
+    EVENT_TICK = "Tick"
+    EVENT_QUIT = "Quit"
 
     EVENT_ACTION_FAIL = "Action failed"
     EVENT_SOMETHING_HAPPENED = "Something Happened"
+    EVENT_LOAD = "Game Loaded"
+    EVENT_SAVED = "Game Saved"
 
     SAVE_GAME_DIR = os.path.join(os.path.dirname(__file__), "saves")
     GAME_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+
+    MAX_STATUS_MESSAGES = 5
+    STATUS_MESSAGE_LIFETIME = 16
 
     def __init__(self, name: str):
 
@@ -219,9 +225,9 @@ class Game:
                                            Game.EVENT_SOMETHING_HAPPENED))
 
 
-        EventQueue.add_event(Event(Game.TICK,
-                                   "Game ticked to {0}".format(self.tick_count),
-                                   Game.TICK))
+        # EventQueue.add_event(Event(Game.TICK,
+        #                            "Game ticked to {0}".format(self.tick_count),
+        #                            Game.TICK))
 
         for creation in self.creations.values():
             creation.tick()
@@ -259,10 +265,57 @@ class Game:
 
         logging.info("Ending {0}...".format(self.name))
 
-        self.state = Game.END
+        self.state = Game.EVENT_END
 
-    def save(self):
-        pass
+    def save(self,file_name : str = None):
 
-    def load(self):
-        pass
+        self.pause(is_paused = True)
+
+        if file_name is None:
+            file_name = self.name + ".world"
+
+        full_file_name = os.path.join(Game.SAVE_GAME_DIR, file_name)
+
+        print("Game saved to {0}".format(full_file_name))
+
+        game_file = open(full_file_name, "wb")
+        pickle.dump(self.map, game_file)
+        game_file.close()
+
+        logging.info("%s saved." % file_name)
+        print("Game saved to {0}".format(full_file_name))
+
+        EventQueue.add_event(Event(Game.EVENT_SAVED,
+                                   "Game saved to {0}".format(file_name),
+                                   "GAME"))
+
+
+    def load(self, file_name : str = None):
+
+        if file_name is None:
+            file_name = self.name + ".world"
+
+        full_file_name = os.path.join(Game.SAVE_GAME_DIR, file_name)
+
+        try:
+            game_file = open(full_file_name, "rb")
+            new_game = pickle.load(game_file)
+            game_file.close()
+
+            self.map = new_game
+
+            logging.info("\n%s loaded.\n" % file_name)
+
+            EventQueue.add_event(Event(Game.EVENT_LOAD,
+                                       "Game loaded from {0}".format(file_name),
+                                       "GAME"))
+            print("Game loaded")
+
+        except IOError:
+
+            logging.warning("Kingdom World file %s not found." % file_name)
+
+
+
+
+

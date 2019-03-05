@@ -443,7 +443,7 @@ class WorldMap:
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.6,
-        TILE_ICE: 1.82, # Ice level lowers
+        TILE_ICE: 1.75, # Ice level lowers
         TILE_SNOW: 1.98 # Snow level lowers
 
     }

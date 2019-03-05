@@ -104,7 +104,7 @@ class AudioManager:
 
         new_theme_name = AudioManager.DEFAULT_THEME
         new_theme = {
-            model.Game.TICK: "LTTP_Menu_Cursor.wav",
+            model.Game.EVENT_TICK: "LTTP_Menu_Cursor.wav",
             model.Game.STATE_PLAYING: "LTTP_Rupee1.wav",
             model.Game.STATE_PAUSED: "LTTP_Menu_Select.wav",
             model.Game.STATE_GAME_OVER: "LTTP_Link_Hurt.wav",

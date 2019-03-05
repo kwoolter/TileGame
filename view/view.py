@@ -375,8 +375,9 @@ class StatusBar(BaseView):
     ICON_WIDTH = 40
     PADDING = 40
     STATUS_TEXT_FONT_SIZE = 24
-    MESSAGE_TICK_DURATION = 10
-    MESSAGE_TICK_LIFE = 20
+    MESSAGE_TICK_DURATION = 3
+    MESSAGE_TICK_LIFE = 2
+
 
     def __init__(self, width: int, height: int):
 
@@ -415,13 +416,14 @@ class StatusBar(BaseView):
                     self.status_messages[self.current_message_number] = (msg, count - 1)
                 else:
                     del self.status_messages[self.current_message_number]
+                    print("Deleting msg {0} of {1}".format(self.current_message_number, len(self.status_messages)))
 
     def draw(self):
 
         self.surface.fill(StatusBar.BG_COLOUR)
 
         if len(self.status_messages) == 0 or self.current_message_number >= len(self.status_messages):
-            msg = "{0}".format(self.game.state)
+            msg = ""
         else:
             msg, count = self.status_messages[self.current_message_number]
 
@@ -458,7 +460,7 @@ class StatusBar(BaseView):
                       centre=False)
 
         elif self.game.state == model.Game.STATE_PAUSED:
-            msg = "Esc:Resume   F5:Toggle Sound   F6:Toggle Music   F4:Quit"
+            msg = "Esc:Resume   F5:Toggle Sound   F6:Toggle Music   F4:Quit   F11:Load   F12:Save"
             draw_text(self.surface,
                       msg=msg,
                       x=10,
@@ -540,7 +542,7 @@ class GameView(BaseView):
     # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
     TILE_IMAGE_HEIGHT = 128
     # TILE_IMAGE_HEIGHT = 64
-    TILE_ALTITUDE_FACTOR = 8
+    TILE_ALTITUDE_FACTOR = 10
     TILE_ALTITUDE_ALPHA_BASE = 200
     TILE_ALTITUDE_ALPHA_FACTOR = 0
 
