@@ -102,7 +102,12 @@ class ImageManager:
         new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.WINTER]
         new_skin = (new_skin_name, {
 
-            # model.WorldMap.TILE_ICE: "3dhexagonWhiteNew.png",
+            model.WorldMap.TILE_FROZEN_WATER: "3dhexagonLightGreyNew.png",
+            model.WorldMap.TILE_FOREST: "3dhexagonDarkGreenSnow.png",
+            model.WorldMap.TILE_EARTH: "3dhexagonBrownSnow.png",
+            model.WorldMap.TILE_ROCK: "3dhexagonDarkGreySnow.png",
+
+
             # model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
             # model.WorldMap.TILE_EARTH: "3dhexagonGreyNew.png",
             # model.WorldMap.TILE_SHALLOWS: "3dhexagonWhiteNew.png",
@@ -426,7 +431,7 @@ class StatusBar(BaseView):
 
         if self.game.state == model.Game.STATE_PLAYING:
 
-            # Check if tehre are status messages that we can display
+            # Check if there are status messages that we can display
             if len(self.status_messages) == 0 or self.current_message_number >= len(self.status_messages):
                 msg = ""
             else:

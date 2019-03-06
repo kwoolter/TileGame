@@ -353,6 +353,7 @@ class WorldMap:
     TILE_SEA = "Sea"
     TILE_DEEP_SEA = "Deep Sea"
     TILE_SHALLOWS = "Shallows"
+    TILE_FROZEN_WATER = "Frozen"
     TILE_SNOW = "Snow"
     TILE_ICE = "Ice"
     TILE_EARTH = "Earth"
@@ -362,7 +363,7 @@ class WorldMap:
     TILE_SCRUB = "Scrub"
     TILE_BORDER = "Border"
 
-    WATER = (TILE_SEA, TILE_DEEP_SEA, TILE_SHALLOWS)
+    WATER = (TILE_SEA, TILE_DEEP_SEA, TILE_SHALLOWS, TILE_FROZEN_WATER)
 
     # Map of altitude to tile zone
 
@@ -436,7 +437,8 @@ class WorldMap:
 
         TILE_DEEP_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.5,# Sea level rises
         TILE_SEA: MIN_ALTITUDE_CLIP_FACTOR * 1.2,# Sea level rises
-        TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 0.8,# Sea level rises
+        #TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 0.8,# Sea level rises
+        TILE_FROZEN_WATER: MIN_ALTITUDE_CLIP_FACTOR * 0.8,  # Shallows freeze over
         TILE_SAND: MIN_ALTITUDE_CLIP_FACTOR * 0.7,
         TILE_GRASS: 0.4,
         TILE_SCRUB: 0.9,

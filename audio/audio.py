@@ -46,8 +46,11 @@ class AudioManager:
         self.load_sound_themes()
         self.load_music_themes()
 
-        pygame.mixer.pre_init(44100, -16, 2, 2048)
-        pygame.mixer.init()
+        try:
+            pygame.mixer.pre_init(44100, -16, 2, 2048)
+            pygame.mixer.init()
+        except Exception as e:
+            print(str(e))
 
         self.is_music_on = False
         self.is_sound_on = False

@@ -34,8 +34,15 @@ class Controller:
         self.view.initialise()
         self.audio.initialise()
 
-        pygame.mixer.pre_init(44100, -16, 2, 2048)
-        pygame.mixer.init()
+        try:
+
+            pygame.mixer.pre_init(44100, -16, 2, 2048)
+            pygame.mixer.init()
+
+        except Exception as e:
+            print(str(e))
+            self.audio.is_music_on = False
+            self.audio.is_sound_on = False
 
         self.audio.is_music_on = False
         self.audio.is_sound_on = False
