@@ -126,7 +126,8 @@ class ImageManager:
         # Add the skin for Harvesting graphics
         new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.HARVESTING]
         new_skin = (new_skin_name, {
-            # model.WorldMap.TILE_GRASS: "3dhexagonYellowNew.png",
+            model.WorldMap.TILE_GRASS: "3dhexagonLightGreenSummer.png",
+            model.WorldMap.TILE_SCRUB: "3dhexagonGreenSummer.png",
 
         })
 
