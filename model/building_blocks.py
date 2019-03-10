@@ -358,7 +358,9 @@ class WorldMap:
     TILE_ICE = "Ice"
     TILE_EARTH = "Earth"
     TILE_SAND = "Sand"
+    TILE_SWAMP = "Swamp"
     TILE_ROCK = "Rock"
+    TILE_LAVA = "Lava"
     TILE_FOREST = "Forest"
     TILE_SCRUB = "Scrub"
     TILE_BORDER = "Border"
@@ -387,7 +389,8 @@ class WorldMap:
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.8,
         TILE_ICE: 2.1,
-        TILE_SNOW: 2.2
+        TILE_SNOW: 2.3,
+        TILE_LAVA: 3.1,
 
     }
 
@@ -406,7 +409,8 @@ class WorldMap:
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.8,
         TILE_ICE: 2.0,
-        TILE_SNOW: 2.2
+        TILE_SNOW: 2.3,
+        TILE_LAVA: 3.1,
 
     }
 
@@ -426,7 +430,8 @@ class WorldMap:
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.9, # Ice level rises
         TILE_ICE: 2.2, # Ice level rises
-        TILE_SNOW: 2.3 # Snow level rises
+        TILE_SNOW: 2.3, # Snow level rises
+        TILE_LAVA: 3.1,
 
     }
 
@@ -440,13 +445,15 @@ class WorldMap:
         #TILE_SHALLOWS: MIN_ALTITUDE_CLIP_FACTOR * 0.8,# Sea level rises
         TILE_FROZEN_WATER: MIN_ALTITUDE_CLIP_FACTOR * 0.8,  # Shallows freeze over
         TILE_SAND: MIN_ALTITUDE_CLIP_FACTOR * 0.7,
+        TILE_SWAMP: MIN_ALTITUDE_CLIP_FACTOR * 0.4,
         TILE_GRASS: 0.4,
         TILE_SCRUB: 0.9,
         TILE_FOREST: 1.2,
         TILE_EARTH: 1.5,
         TILE_ROCK: 1.6,
         TILE_ICE: 1.75, # Ice level lowers
-        TILE_SNOW: 1.98 # Snow level lowers
+        TILE_SNOW: 2.3, # Snow level lowers
+        TILE_LAVA: 3.1,
 
     }
 

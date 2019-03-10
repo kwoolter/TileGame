@@ -74,6 +74,7 @@ class ImageManager:
             model.WorldMap.TILE_SHALLOWS: "3dhexagonLightBlueNew.png",
             model.WorldMap.TILE_ICE: "3dhexagonGreyNew.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGreyNew.png",
+            model.WorldMap.TILE_LAVA: "3dhexagonLava2.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhiteNew.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrownNew.png",
             model.WorldMap.TILE_SAND: "3dhexagonYellowNew.png",
@@ -106,6 +107,7 @@ class ImageManager:
             model.WorldMap.TILE_FOREST: "3dhexagonDarkGreenSnow.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrownSnow.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGreySnow.png",
+            model.WorldMap.TILE_SWAMP: "3dhexagonSwamp2.png",
 
 
             # model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
@@ -753,7 +755,7 @@ class GameView(BaseView):
                         tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH / 2)
                         ty = view_y + y - + int(GameView.TILE_IMAGE_HEIGHT * 3 / 4 * GameView.Y_SQUASH)
 
-                        text = model.HexagonMaths.get_direction(self.active_x, self.active_y, map_x, map_y)
+                        text =" " + model.HexagonMaths.get_direction(self.active_x, self.active_y, map_x, map_y) + " "
 
                         draw_text(self.surface,
                                   msg=text,
