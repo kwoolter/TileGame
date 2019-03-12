@@ -74,15 +74,15 @@ class ImageManager:
             model.WorldMap.TILE_SHALLOWS: "3dhexagonLightBlueNew.png",
             model.WorldMap.TILE_ICE: "3dhexagonGreyNew.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGreyNew.png",
-            model.WorldMap.TILE_LAVA: "3dhexagonLava2.png",
+            model.WorldMap.TILE_LAVA: "3dhexagonLava3.png",
             model.WorldMap.TILE_SNOW: "3dhexagonWhiteNew.png",
             model.WorldMap.TILE_EARTH: "3dhexagonBrownNew.png",
             model.WorldMap.TILE_SAND: "3dhexagonYellowNew.png",
             model.WorldMap.TILE_BORDER: "3dhexagonBlack.png",
             GameView.TILE_HIGHLIGHT: "3dhexagonHighlight3.png",
             GameView.TILE_HIGHLIGHT2: "3dhexagonHighlight.png",
-            model.WorldMap.STRUCTURE_SMALL_HOUSE: "SmallHouse2.png",
-            model.WorldMap.STRUCTURE_BIG_HOUSE: "BigHouse.png",
+            model.WorldMap.STRUCTURE_SMALL_HOUSE: "small_house.png",
+            model.WorldMap.STRUCTURE_BIG_HOUSE: "big_house.png",
             model.WorldMap.STRUCTURE_CAVE: "Cave.png",
             model.WorldMap.STRUCTURE_TENT: "Tent.png",
             model.WorldMap.STRUCTURE_FORT: "Fort.png",
@@ -92,8 +92,9 @@ class ImageManager:
             model.WorldMap.MATERIAL_TREE3: "mango_tree.png",
             model.WorldMap.MATERIAL_SCRUB1: "scrub1.png",
             model.WorldMap.MATERIAL_PLANT1: "plant1.png",
-            model.WorldMap.FOOD_STRAWBERRIES: "strawberries.png",
+            model.WorldMap.FOOD_STRAWBERRIES: "rice.png",
             model.WorldMap.FOOD_CARROTS: "carrots.png",
+            model.WorldMap.STRUCTURE_RICE_FIELD: "rice.png",
 
         })
 
@@ -108,6 +109,8 @@ class ImageManager:
             model.WorldMap.TILE_EARTH: "3dhexagonBrownSnow.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGreySnow.png",
             model.WorldMap.TILE_SWAMP: "3dhexagonSwamp2.png",
+            model.WorldMap.STRUCTURE_SMALL_HOUSE: "small_house_winter.png",
+            model.WorldMap.STRUCTURE_BIG_HOUSE: "big_house_winter.png",
 
 
             # model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
@@ -121,6 +124,10 @@ class ImageManager:
         new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.GROWING]
         new_skin = (new_skin_name, {
 
+            #model.WorldMap.TILE_GRASS: "3dhexagonRice.png",
+
+            model.WorldMap.STRUCTURE_RICE_FIELD: "rice2.png",
+
         })
 
         ImageManager.skins[new_skin_name] = new_skin
@@ -130,6 +137,7 @@ class ImageManager:
         new_skin = (new_skin_name, {
             model.WorldMap.TILE_GRASS: "3dhexagonLightGreenSummer.png",
             model.WorldMap.TILE_SCRUB: "3dhexagonGreenSummer.png",
+            model.WorldMap.STRUCTURE_RICE_FIELD: "rice2.png",
 
         })
 
@@ -546,13 +554,11 @@ class GameView(BaseView):
     TILE_HIGHLIGHT2 = "Highlight2"
 
     Y_SQUASH = 1.0
+
     TILE_ROTATE_ANGLE = 30
     TILE_IMAGE_WIDTH = 128
-    # TILE_IMAGE_WIDTH = 64
-    CREATION_IMAGE_WIDTH = int(TILE_IMAGE_WIDTH * 0.75)
-    # TILE_IMAGE_HEIGHT = int(64 * Y_SQUASH)
-    TILE_IMAGE_HEIGHT = 128
-    # TILE_IMAGE_HEIGHT = 64
+    CREATION_IMAGE_WIDTH = int(TILE_IMAGE_WIDTH * 1.00)
+    TILE_IMAGE_HEIGHT = int(TILE_IMAGE_WIDTH * Y_SQUASH)
     TILE_ALTITUDE_FACTOR = 10
     TILE_ALTITUDE_ALPHA_BASE = 200
     TILE_ALTITUDE_ALPHA_FACTOR = 0
@@ -773,7 +779,8 @@ class GameView(BaseView):
                         # Get the image for the creation based on its name
                         image = BaseView.image_manager.get_skin_image(creation.name,
                                                                       width=GameView.CREATION_IMAGE_WIDTH,
-                                                                      tick=self.tick_count)
+                                                                      tick=self.tick_count,
+                                                                      skin_name=skin_name)
 
                         # If it is not yet complete then change the image transaprecny based on % complete
                         if creation.is_complete is False:

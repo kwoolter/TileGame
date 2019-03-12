@@ -315,6 +315,24 @@
             </resource>
         </outputs>
     </creatable>
+    <creatable id="Rice">
+        <name>Rice</name>
+        <description>Rice</description>
+        <graphic>w</graphic>
+        <ticks_required>5</ticks_required>
+        <pre_requisites>
+            <resource>
+                <name>Wood</name>
+                <count>4</count>
+            </resource>
+        </pre_requisites>
+        <outputs>
+            <resource>
+                <name>XP</name>
+                <count>10</count>
+            </resource>
+        </outputs>
+    </creatable>
     <creatable id="Border">
         <name>Border</name>
         <description>Border</description>

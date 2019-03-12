@@ -466,6 +466,7 @@ class WorldMap:
     STRUCTURE_TENT = "Tent"
     STRUCTURE_MARKET = "Market"
     STRUCTURE_FORT = "Fort"
+    STRUCTURE_RICE_FIELD = "Rice"
 
     MATERIAL_TREE = "Trees"
     MATERIAL_TREE2 = "Mango Tree"
