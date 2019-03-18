@@ -247,7 +247,7 @@
         <name>Scrub1</name>
         <description>Scrub1</description>
         <graphic>w</graphic>
-        <ticks_required>5</ticks_required>
+        <ticks_required>0</ticks_required>
         <pre_requisites>
             <resource>
                 <name>Wood</name>
@@ -337,7 +337,17 @@
         <name>Border</name>
         <description>Border</description>
         <graphic>w</graphic>
-        <ticks_required>5</ticks_required>
+        <ticks_required>0</ticks_required>
+        <pre_requisites>
+        </pre_requisites>
+        <outputs>
+        </outputs>
+    </creatable>
+        <creatable id="Obelisk">
+        <name>Obelisk</name>
+        <description>Obelisk</description>
+        <graphic>!</graphic>
+        <ticks_required>0</ticks_required>
         <pre_requisites>
         </pre_requisites>
         <outputs>

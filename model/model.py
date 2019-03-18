@@ -128,6 +128,12 @@ class Game:
 
     def add_initial_creations(self):
 
+
+        x,y = self.map.summit
+        self.add_creation_by_name(WorldMap.STRUCTURE_OBELISK, x, y)
+
+        print("Adding summit obelisk at {0}".format(self.map.summit))
+
         tile_to_creation = {
             WorldMap.TILE_FOREST: (WorldMap.MATERIAL_TREE, WorldMap.MATERIAL_TREE2),
             WorldMap.TILE_SCRUB: WorldMap.MATERIAL_SCRUB1,
@@ -206,6 +212,7 @@ class Game:
     def new_map(self):
         self.creations = {}
         self.map.initialise()
+        self.add_initial_creations()
 
     def tick(self):
 

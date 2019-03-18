@@ -95,6 +95,7 @@ class ImageManager:
             model.WorldMap.FOOD_STRAWBERRIES: "rice.png",
             model.WorldMap.FOOD_CARROTS: "carrots.png",
             model.WorldMap.STRUCTURE_RICE_FIELD: "rice.png",
+            model.WorldMap.STRUCTURE_OBELISK: "obelisk.png",
 
         })
 
@@ -112,7 +113,6 @@ class ImageManager:
             model.WorldMap.STRUCTURE_SMALL_HOUSE: "small_house_winter.png",
             model.WorldMap.STRUCTURE_BIG_HOUSE: "big_house_winter.png",
 
-
             # model.WorldMap.TILE_ROCK: "3dhexagonGreyNew.png",
             # model.WorldMap.TILE_EARTH: "3dhexagonGreyNew.png",
             # model.WorldMap.TILE_SHALLOWS: "3dhexagonWhiteNew.png",
@@ -124,7 +124,7 @@ class ImageManager:
         new_skin_name = model.CurrentSeason.season_number_to_name[model.CurrentSeason.GROWING]
         new_skin = (new_skin_name, {
 
-            #model.WorldMap.TILE_GRASS: "3dhexagonRice.png",
+            # model.WorldMap.TILE_GRASS: "3dhexagonRice.png",
 
             model.WorldMap.STRUCTURE_RICE_FIELD: "rice2.png",
 
@@ -394,7 +394,6 @@ class StatusBar(BaseView):
     MESSAGE_TICK_DURATION = 3
     MESSAGE_TICK_LIFE = 2
 
-
     def __init__(self, width: int, height: int):
 
         super(StatusBar, self).__init__()
@@ -588,10 +587,10 @@ class GameView(BaseView):
                              int((self.game.map.height - self.view_tiles_height) / 2))
         self.set_active()
 
-    def model_to_view(self, x: int, y: int, z: int = 0, a_override: bool = False):
+    def model_to_view(self, x: int, y: int, z: int = 0, a_override: bool = False, new_a: int = 0):
 
         if a_override is True:
-            a = 0
+            a = new_a
         else:
             a = self.game.map.get_altitude(x, y) * GameView.TILE_ALTITUDE_FACTOR
 
@@ -761,7 +760,7 @@ class GameView(BaseView):
                         tx = view_x + x + int(GameView.TILE_IMAGE_WIDTH / 2)
                         ty = view_y + y - + int(GameView.TILE_IMAGE_HEIGHT * 3 / 4 * GameView.Y_SQUASH)
 
-                        text =" " + model.HexagonMaths.get_direction(self.active_x, self.active_y, map_x, map_y) + " "
+                        text = " " + model.HexagonMaths.get_direction(self.active_x, self.active_y, map_x, map_y) + " "
 
                         draw_text(self.surface,
                                   msg=text,
@@ -791,8 +790,8 @@ class GameView(BaseView):
                         # Convert the model coords to view coords and blit the tile image at that location
                         view_x, view_y = self.model_to_view(map_x, map_y, 1)
                         self.surface.blit(image, (
-                        view_x + int((GameView.TILE_IMAGE_WIDTH - GameView.CREATION_IMAGE_WIDTH) / 2),
-                        view_y + y - image.get_height()))
+                            view_x + int((GameView.TILE_IMAGE_WIDTH - GameView.CREATION_IMAGE_WIDTH) / 2),
+                            view_y + y - image.get_height()))
 
                         text = ""
                         if creation.is_complete is False:

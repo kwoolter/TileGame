@@ -467,6 +467,7 @@ class WorldMap:
     STRUCTURE_MARKET = "Market"
     STRUCTURE_FORT = "Fort"
     STRUCTURE_RICE_FIELD = "Rice"
+    STRUCTURE_OBELISK = "Obelisk"
 
     MATERIAL_TREE = "Trees"
     MATERIAL_TREE2 = "Mango Tree"
@@ -484,6 +485,7 @@ class WorldMap:
         self.map = []
         self.maps_by_theme = {}
         self.topo_model_pass2 = []
+        self.summit = (None,None)
 
     def initialise(self):
 
@@ -539,6 +541,7 @@ class WorldMap:
         # Get the mean and stdev of the all altitudes
         a_mean = self.altitude_mean
         a_std = self.altitude_std
+        a_max = self.altitude_max
 
         # loop through all points on the map
         for y in range(0, self.height):
@@ -551,6 +554,16 @@ class WorldMap:
                 if x == 0 or x == (self.width - 1) or y == 0 or y == (self.height - 1):
                     tile = WorldMap.TILE_BORDER
 
+                # If this is the highest point...
+                elif a >= a_max:
+
+                    # Make the tile a volcano
+                    tile = WorldMap.TILE_LAVA
+
+                    # Store the location of the summit
+                    self.summit = (x,y)
+
+
                 # Else use topo zones to place a point in a zone based on its altitude
                 else:
                     for tile, altitude in topo_zone:
@@ -562,10 +575,32 @@ class WorldMap:
 
                 tile_counts[tile] += 1
 
+
+        x,y = self.summit
+
+        # Raise the summit by a %
+        a = self.get_altitude(x, y)
+        a *= 1.05
+        self.set_altitude(a, x, y)
+
+        # Summit surrounded by Snow
+        adjacent = HexagonMaths.adjacent(x,y)
+        for x,y in adjacent:
+            if self.is_valid_xy(x,y):
+
+                # Raise the altitude  by a %
+                a = self.get_altitude(x, y)
+                a *= 1.03
+                self.set_altitude(a, x, y)
+
+                # Make the tile snow
+                map[x][y] = WorldMap.TILE_SNOW
+
         # Store the tile map in the map to theme dictionary
         self.maps_by_theme[theme] = map
 
         print("Theme {0}:Tiles assigned (count={1}: {2})".format(theme, sum(tile_counts.values()),tile_counts))
+        print("Highest point at {0}.".format(self.summit))
 
         return
 
