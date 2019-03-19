@@ -18,6 +18,7 @@ Grass,Grass,Structure,!
 Scrub,Scrub,Structure,$
 Sea,Sea,Water,~
 Deep Sea,Deep Sea,Water,v
+Deep Sea Abyss,Deep Sea Abyss,Water,V
 Shallows,Shallows,Water,.
 Sand,Sand,Material,.
 Rock,Rock,Material,^

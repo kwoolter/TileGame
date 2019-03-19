@@ -352,6 +352,7 @@ class WorldMap:
     TILE_GRASS = "Grass"
     TILE_SEA = "Sea"
     TILE_DEEP_SEA = "Deep Sea"
+    TILE_ABYSS = "Deep Sea Abyss"
     TILE_SHALLOWS = "Shallows"
     TILE_FROZEN_WATER = "Frozen"
     TILE_SNOW = "Snow"
@@ -365,7 +366,7 @@ class WorldMap:
     TILE_SCRUB = "Scrub"
     TILE_BORDER = "Border"
 
-    WATER = (TILE_SEA, TILE_DEEP_SEA, TILE_SHALLOWS, TILE_FROZEN_WATER)
+    WATER = (TILE_SEA, TILE_DEEP_SEA, TILE_SHALLOWS, TILE_FROZEN_WATER, TILE_ABYSS)
 
     # Map of altitude to tile zone
 
@@ -486,6 +487,7 @@ class WorldMap:
         self.maps_by_theme = {}
         self.topo_model_pass2 = []
         self.summit = (None,None)
+        self.abyss = (None, None)
 
     def initialise(self):
 
@@ -533,7 +535,7 @@ class WorldMap:
         # Initialise a dictionary to keep track of how many tiles for each zone be assign
         tile_counts = {}
         tiles = list(WorldMap.topo_zone_themes[theme].keys())
-        tiles.append(WorldMap.TILE_BORDER)
+        tiles += [WorldMap.TILE_BORDER, WorldMap.TILE_ABYSS]
 
         for tile in tiles:
             tile_counts[tile] = 0
@@ -542,6 +544,7 @@ class WorldMap:
         a_mean = self.altitude_mean
         a_std = self.altitude_std
         a_max = self.altitude_max
+        a_min = self.altitude_min
 
         # loop through all points on the map
         for y in range(0, self.height):
@@ -550,18 +553,15 @@ class WorldMap:
                 # Get the altitude at the selected point on the map
                 a = self.get_altitude(x, y)
 
+                # If this is the highest point store the location of the summit
+                if a >= a_max:
+                    self.summit = (x,y)
+                elif a <= a_min:
+                    self.abyss = (x,y)
+
                 # If this is the edge of the map set to a border
                 if x == 0 or x == (self.width - 1) or y == 0 or y == (self.height - 1):
                     tile = WorldMap.TILE_BORDER
-
-                # If this is the highest point...
-                elif a >= a_max:
-
-                    # Make the tile a volcano
-                    tile = WorldMap.TILE_LAVA
-
-                    # Store the location of the summit
-                    self.summit = (x,y)
 
 
                 # Else use topo zones to place a point in a zone based on its altitude
@@ -576,7 +576,9 @@ class WorldMap:
                 tile_counts[tile] += 1
 
 
+        # Make the summit a lava tile
         x,y = self.summit
+        map[x][y] = WorldMap.TILE_LAVA
 
         # Raise the summit by a %
         a = self.get_altitude(x, y)
@@ -594,13 +596,28 @@ class WorldMap:
                 self.set_altitude(a, x, y)
 
                 # Make the tile snow
-                map[x][y] = WorldMap.TILE_SNOW
+                tile = WorldMap.TILE_SNOW
+                map[x][y] = tile
+                tile_counts[tile] += 1
+
+        # Make the deepest tile an abyss
+        x,y = self.abyss
+        map[x][y] = WorldMap.TILE_ABYSS
+
+        # Deepest tile surrounded by abyss
+        adjacent = HexagonMaths.adjacent(x,y)
+        for x,y in adjacent:
+            if self.is_valid_xy(x,y):
+                tile = WorldMap.TILE_ABYSS
+                map[x][y] = tile
+                tile_counts[tile] += 1
 
         # Store the tile map in the map to theme dictionary
         self.maps_by_theme[theme] = map
 
         print("Theme {0}:Tiles assigned (count={1}: {2})".format(theme, sum(tile_counts.values()),tile_counts))
         print("Highest point at {0}.".format(self.summit))
+        print("Lowest point at {0}.".format(self.abyss))
 
         return
 

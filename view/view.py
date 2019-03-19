@@ -71,6 +71,7 @@ class ImageManager:
             model.WorldMap.TILE_FOREST: "3dhexagonDarkGreenNew.png",
             model.WorldMap.TILE_SEA: "3dhexagonBlueNew.png",
             model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlueNew.png",
+            model.WorldMap.TILE_ABYSS: "3dhexagonDeepBlueNew.png",
             model.WorldMap.TILE_SHALLOWS: "3dhexagonLightBlueNew.png",
             model.WorldMap.TILE_ICE: "3dhexagonGreyNew.png",
             model.WorldMap.TILE_ROCK: "3dhexagonDarkGreyNew.png",
@@ -481,6 +482,16 @@ class StatusBar(BaseView):
             draw_text(self.surface,
                       msg=msg,
                       x=10,
+                      y=int(pane_rect.height / 2),
+                      fg_colour=StatusBar.FG_COLOUR,
+                      bg_colour=StatusBar.BG_COLOUR,
+                      size=StatusBar.STATUS_TEXT_FONT_SIZE,
+                      centre=False)
+
+            msg = "H:{0} L:{1}".format(self.game.map.summit, self.game.map.abyss)
+            draw_text(self.surface,
+                      msg=msg,
+                      x=pane_rect.width*0.75,
                       y=int(pane_rect.height / 2),
                       fg_colour=StatusBar.FG_COLOUR,
                       bg_colour=StatusBar.BG_COLOUR,
