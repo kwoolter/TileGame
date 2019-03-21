@@ -19,6 +19,7 @@ Scrub,Scrub,Structure,$
 Sea,Sea,Water,~
 Deep Sea,Deep Sea,Water,v
 Deep Sea Abyss,Deep Sea Abyss,Water,V
+Whirlpool,Whirlpool,Water,@
 Shallows,Shallows,Water,.
 Sand,Sand,Material,.
 Rock,Rock,Material,^
@@ -35,3 +36,4 @@ Scrub1,Scrub1,Structure,u
 Plant1,Plant1,Structure,p
 Border,Border,Structure,[
 Obelisk,Obelisk,Structure,!
+Tentacle,Tentacle,Structure,S

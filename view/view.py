@@ -7,7 +7,7 @@ from .graphics import *
 
 class ImageManager:
     DEFAULT_SKIN = "default"
-    RESOURCES_DIR = os.path.dirname(__file__) + "\\resources\\"
+    RESOURCES_DIR = os.path.join(os.path.dirname(__file__),"resources")
     TRANSPARENT = (1, 2, 3)
 
     image_cache = {}
@@ -29,13 +29,13 @@ class ImageManager:
 
             if image_file_name in self.sprite_sheets.keys():
                 file_name, rect = self.sprite_sheets[image_file_name]
-                filename = ImageManager.RESOURCES_DIR + file_name
+                filename = os.path.join(ImageManager.RESOURCES_DIR, file_name)
                 logging.info("Loading image {0} from {1} at {2}...".format(image_file_name, filename, rect))
 
                 image_sheet = spritesheet(filename)
                 original_image = image_sheet.image_at(rect)
             else:
-                filename = ImageManager.RESOURCES_DIR + image_file_name
+                filename = os.path.join(ImageManager.RESOURCES_DIR, image_file_name)
                 logging.info("Loading image {0}...".format(filename))
                 image_sheet = spritesheet(filename)
                 original_image = image_sheet.image_at()
@@ -71,6 +71,7 @@ class ImageManager:
             model.WorldMap.TILE_FOREST: "3dhexagonDarkGreenNew.png",
             model.WorldMap.TILE_SEA: "3dhexagonBlueNew.png",
             model.WorldMap.TILE_DEEP_SEA: "3dhexagonDarkBlueNew.png",
+            model.WorldMap.TILE_WHIRLPOOL: "whirlpool.png",
             model.WorldMap.TILE_ABYSS: "3dhexagonDeepBlueNew.png",
             model.WorldMap.TILE_SHALLOWS: "3dhexagonLightBlueNew.png",
             model.WorldMap.TILE_ICE: "3dhexagonGreyNew.png",
@@ -97,6 +98,8 @@ class ImageManager:
             model.WorldMap.FOOD_CARROTS: "carrots.png",
             model.WorldMap.STRUCTURE_RICE_FIELD: "rice.png",
             model.WorldMap.STRUCTURE_OBELISK: "obelisk.png",
+            model.WorldMap.STRUCTURE_TENTACLE: ("tentacle0.png","tentacle1.png")
+
 
         })
 
@@ -179,9 +182,9 @@ class ImageManager:
 
     def load_sprite_sheets(self):
 
-        sheet_file_name = "fire.png"
-        for i in range(0, 3):
-            self.sprite_sheets["fire{0}.png".format(i)] = (sheet_file_name, (i * 32, 0, 32, 32))
+        sheet_file_name = "tentacles_sheet.png"
+        for i in range(0, 2):
+            self.sprite_sheets["tentacle{0}.png".format(i)] = (sheet_file_name, (i * 128, 0, 128, 152))
 
 
 class BaseView():

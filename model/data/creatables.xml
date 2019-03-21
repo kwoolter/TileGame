@@ -343,10 +343,20 @@
         <outputs>
         </outputs>
     </creatable>
-        <creatable id="Obelisk">
+    <creatable id="Obelisk">
         <name>Obelisk</name>
         <description>Obelisk</description>
         <graphic>!</graphic>
+        <ticks_required>0</ticks_required>
+        <pre_requisites>
+        </pre_requisites>
+        <outputs>
+        </outputs>
+    </creatable>
+    <creatable id="Tentacle">
+        <name>Tentacle</name>
+        <description>Tentacle</description>
+        <graphic>S</graphic>
         <ticks_required>0</ticks_required>
         <pre_requisites>
         </pre_requisites>

@@ -132,6 +132,9 @@ class Game:
         x,y = self.map.summit
         self.add_creation_by_name(WorldMap.STRUCTURE_OBELISK, x, y)
 
+        x,y = self.map.abyss
+        self.add_creation_by_name(WorldMap.STRUCTURE_TENTACLE, x, y)
+
         print("Adding summit obelisk at {0}".format(self.map.summit))
 
         tile_to_creation = {

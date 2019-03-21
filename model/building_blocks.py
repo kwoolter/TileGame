@@ -353,6 +353,7 @@ class WorldMap:
     TILE_SEA = "Sea"
     TILE_DEEP_SEA = "Deep Sea"
     TILE_ABYSS = "Deep Sea Abyss"
+    TILE_WHIRLPOOL = "Whirlpool"
     TILE_SHALLOWS = "Shallows"
     TILE_FROZEN_WATER = "Frozen"
     TILE_SNOW = "Snow"
@@ -366,7 +367,7 @@ class WorldMap:
     TILE_SCRUB = "Scrub"
     TILE_BORDER = "Border"
 
-    WATER = (TILE_SEA, TILE_DEEP_SEA, TILE_SHALLOWS, TILE_FROZEN_WATER, TILE_ABYSS)
+    WATER = (TILE_SEA, TILE_DEEP_SEA, TILE_SHALLOWS, TILE_FROZEN_WATER, TILE_ABYSS, TILE_WHIRLPOOL)
 
     # Map of altitude to tile zone
 
@@ -469,6 +470,7 @@ class WorldMap:
     STRUCTURE_FORT = "Fort"
     STRUCTURE_RICE_FIELD = "Rice"
     STRUCTURE_OBELISK = "Obelisk"
+    STRUCTURE_TENTACLE = "Tentacle"
 
     MATERIAL_TREE = "Trees"
     MATERIAL_TREE2 = "Mango Tree"
@@ -602,7 +604,7 @@ class WorldMap:
 
         # Make the deepest tile an abyss
         x,y = self.abyss
-        map[x][y] = WorldMap.TILE_ABYSS
+        map[x][y] = WorldMap.TILE_WHIRLPOOL
 
         # Deepest tile surrounded by abyss
         adjacent = HexagonMaths.adjacent(x,y)
